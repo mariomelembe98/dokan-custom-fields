@@ -4,7 +4,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-function custom_plugin_styles() {
+function custom_plugin_styles(): void {
 	if (is_plugin_active('dokan-custom-fields/dokan-custom-fields.php')) {
 		wp_enqueue_style('custom-plugin-styles', plugins_url('/css/styles.css', __FILE__));
 	}
@@ -12,7 +12,7 @@ function custom_plugin_styles() {
 add_action('wp_enqueue_scripts', 'custom_plugin_styles');
 
 add_action( 'dokan_seller_registration_field_after', 'dokan_custom_registration_fields' );
-function dokan_custom_registration_fields() {
+function dokan_custom_registration_fields(): void {
 	$countries = WC()->countries->get_countries();
 	$states = WC()->countries->get_states();
 
