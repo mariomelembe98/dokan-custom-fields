@@ -11,15 +11,15 @@ function is_seller_registration() {
 // TODO: Renderizar campos dinâmicos no registro
 function render_dynamic_fields() {
 
-	// TODO: Verifica se o usuário está se registrando como vendedor
-    //	if (!is_seller_registration()) {
-    //		return; // TODO: Se não for um vendedor, não exibir os campos
-    //	}
+	// Verifica se o usuário está se registrando como vendedor
+	// if (!is_seller_registration()) {
+	// 	return; // Se não for um vendedor, não exibir os campos
+	// }
 
-	// TODO: Recupera os campos personalizados armazenados no banco de dados
+	// Recupera os campos personalizados armazenados no banco de dados
 	$custom_fields = get_option('custom_registration_fields', []);
 
-	// TODO: Verifica se há campos a serem renderizados
+	// Verifica se há campos a serem renderizados
 	if (!empty($custom_fields)) {
 		foreach ($custom_fields as $field) {
 			$field_name = esc_attr($field['name']);
@@ -27,13 +27,25 @@ function render_dynamic_fields() {
 			$field_options = isset($field['options']) ? $field['options'] : [];
 			$field_label = isset($field['label']) ? esc_html($field['label']) : ucfirst($field_name);
 
-			// TODO: Renderiza os campos de acordo com o tipo
+			// Recuperar o valor atual do campo para o usuário logado
+			$field_value = get_user_meta(get_current_user_id(), $field_name, true);
+
+			// Renderizar os campos de acordo com o tipo
 			switch ($field_type) {
 				case 'text':
 					?>
                     <p class="form-row form-group form-row-wide">
                         <label for="<?php echo $field_name; ?>"><?php echo $field_label; ?></label>
-                        <input type="text" class="input-text form-control" name="<?php echo $field_name; ?>" id="<?php echo $field_name; ?>" value="" />
+                        <input type="text" class="input-text form-control" name="<?php echo $field_name; ?>" id="<?php echo $field_name; ?>" value="<?php echo esc_attr($field_value); ?>" />
+                    </p>
+					<?php
+					break;
+
+				case 'date':
+					?>
+                    <p class="form-row form-group form-row-wide">
+                        <label for="<?php echo $field_name; ?>"><?php echo $field_label; ?></label>
+                        <input type="date" class="input-text form-control" name="<?php echo $field_name; ?>" id="<?php echo $field_name; ?>" value="<?php echo esc_attr($field_value); ?>" />
                     </p>
 					<?php
 					break;
@@ -45,7 +57,7 @@ function render_dynamic_fields() {
                         <select name="<?php echo $field_name; ?>" id="<?php echo $field_name; ?>" class="input-text form-control">
                             <option value=""><?php esc_html_e('Selecione uma opção', 'dokan'); ?></option>
 							<?php foreach ($field_options as $option): ?>
-                                <option value="<?php echo esc_attr($option); ?>"><?php echo esc_html($option); ?></option>
+                                <option value="<?php echo esc_attr($option); ?>" <?php selected($field_value, $option); ?>><?php echo esc_html($option); ?></option>
 							<?php endforeach; ?>
                         </select>
                     </p>
@@ -58,7 +70,7 @@ function render_dynamic_fields() {
                         <label><?php echo $field_label; ?></label>
 						<?php foreach ($field_options as $option): ?>
                             <label for="<?php echo $field_name . '_' . esc_attr($option); ?>">
-                                <input type="checkbox" class="input-checkbox" name="<?php echo $field_name; ?>[]" id="<?php echo $field_name . '_' . esc_attr($option); ?>" value="<?php echo esc_attr($option); ?>" />
+                                <input type="checkbox" class="input-checkbox" name="<?php echo $field_name; ?>[]" id="<?php echo $field_name . '_' . esc_attr($option); ?>" value="<?php echo esc_attr($option); ?>" <?php checked(is_array($field_value) && in_array($option, $field_value)); ?> />
 								<?php echo esc_html($option); ?>
                             </label>
 						<?php endforeach; ?>
@@ -72,7 +84,7 @@ function render_dynamic_fields() {
                         <label><?php echo $field_label; ?></label>
 						<?php foreach ($field_options as $option): ?>
                             <label for="<?php echo $field_name . '_' . esc_attr($option); ?>">
-                                <input type="radio" class="input-radio" name="<?php echo $field_name; ?>" id="<?php echo $field_name . '_' . esc_attr($option); ?>" value="<?php echo esc_attr($option); ?>" />
+                                <input type="radio" class="input-radio" name="<?php echo $field_name; ?>" id="<?php echo $field_name . '_' . esc_attr($option); ?>" value="<?php echo esc_attr($option); ?>" <?php checked($field_value, $option); ?> />
 								<?php echo esc_html($option); ?>
                             </label>
 						<?php endforeach; ?>
@@ -80,8 +92,26 @@ function render_dynamic_fields() {
 					<?php
 					break;
 
+				case 'email':
+					?>
+                    <p class="form-row form-group form-row-wide">
+                        <label for="<?php echo $field_name; ?>"><?php echo $field_label; ?></label>
+                        <input type="email" class="input-text form-control" name="<?php echo $field_name; ?>" id="<?php echo $field_name; ?>" value="<?php echo esc_attr($field_value); ?>" />
+                    </p>
+					<?php
+					break;
+
+				case 'number':
+					?>
+                    <p class="form-row form-group form-row-wide">
+                        <label for="<?php echo $field_name; ?>"><?php echo $field_label; ?></label>
+                        <input type="number" class="input-text form-control" name="<?php echo $field_name; ?>" id="<?php echo $field_name; ?>" value="<?php echo esc_attr($field_value); ?>" />
+                    </p>
+					<?php
+					break;
+
 				default:
-					// TODO: Outros tipos de campo podem ser tratados aqui
+					// Outros tipos de campo podem ser tratados aqui
 					break;
 			}
 		}
@@ -103,37 +133,49 @@ function save_dynamic_fields($customer_id) {
 			if (isset($_POST[$field_name])) {
 				$field_value = $_POST[$field_name];
 
-				// TODO: Tratar cada tipo de campo de maneira apropriada
+				// Tratar cada tipo de campo de maneira apropriada
 				switch ($field['type']) {
 					case 'text':
-						// TODO: Sanitiza como um texto normal
-						$sanitized_value = sanitize_text_field($field_value);
-						break;
-
 					case 'select':
 					case 'radio':
-						// TODO: Sanitiza como um valor único (já que ambos são escolhas únicas)
+					case 'textarea':
+						// Sanitiza como texto
 						$sanitized_value = sanitize_text_field($field_value);
 						break;
 
 					case 'checkbox':
-						// TODO: Se for checkbox, pode ser um array de valores
+						// Se for checkbox, pode ser um array de valores
 						if (is_array($field_value)) {
-							// TODO: Sanitiza todos os valores dentro do array
+							// Sanitiza todos os valores dentro do array
 							$sanitized_value = array_map('sanitize_text_field', $field_value);
 						} else {
-							// TODO: Se não for array, sanitiza como texto
+							// Se não for array, sanitiza como texto único
 							$sanitized_value = sanitize_text_field($field_value);
 						}
 						break;
 
+					case 'email':
+						// Sanitiza como email
+						$sanitized_value = sanitize_email($field_value);
+						break;
+
+					case 'number':
+						// Sanitiza como número
+						$sanitized_value = floatval($field_value);
+						break;
+
+					case 'date':
+						// Sanitiza como uma data válida
+						$sanitized_value = date('Y-m-d', strtotime($field_value));
+						break;
+
 					default:
-						// TODO: Se o tipo for inesperado, sanitize como texto por segurança
+						// Se o tipo for inesperado, sanitiza como texto por segurança
 						$sanitized_value = sanitize_text_field($field_value);
 						break;
 				}
 
-				// TODO: Salvar o campo sanitizado no meta do usuário
+				// Salvar o campo sanitizado no meta do usuário
 				update_user_meta($customer_id, $field_name, $sanitized_value);
 			}
 		}

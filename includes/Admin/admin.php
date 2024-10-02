@@ -1,6 +1,5 @@
 <?php
-// TODO: Adicionar um menu ao admin para gerenciar campos personalizados
-// TODO: Regista o menu de administração
+// Adicionar um menu ao admin para gerenciar campos personalizados
 add_action('admin_menu', 'custom_fields_menu');
 
 /**
@@ -63,60 +62,63 @@ function custom_fields_page() {
 	$custom_fields = get_option('custom_registration_fields', []);
 
 	?>
-	<div class="wrap">
-		<h1>Gerenciar Campos Personalizados</h1>
-		<form method="post" action="">
+    <div class="wrap">
+        <h1>Gerenciar Campos Personalizados</h1>
+        <form method="post" action="">
 			<?php wp_nonce_field('custom_fields_save', 'custom_fields_nonce'); ?>
-			<table class="form-table">
-				<tr>
-					<th>Nome do Campo</th>
-					<th>Tipo de Campo</th>
-					<th>Opções (para Select, Checkbox, Radio)</th>
-					<th>Ações</th>
-				</tr>
+            <table class="form-table">
+                <tr>
+                    <th>Nome do Campo</th>
+                    <th>Tipo de Campo</th>
+                    <th>Opções (para Select, Checkbox, Radio)</th>
+                    <th>Ações</th>
+                </tr>
 				<?php foreach ($custom_fields as $index => $field): ?>
-					<tr>
-						<td>
-							<input type="text" name="custom_fields[<?php echo $index; ?>][name]" value="<?php echo esc_attr($field['name'] ?? ''); ?>" required />
-						</td>
-						<td>
-							<select name="custom_fields[<?php echo $index; ?>][type]" class="field-type">
-								<option value="text" <?php selected($field['type'], 'text'); ?>>Texto</option>
-								<option value="select" <?php selected($field['type'], 'select'); ?>>Seleção</option>
-								<option value="checkbox" <?php selected($field['type'], 'checkbox'); ?>>Checkbox</option>
-								<option value="radio" <?php selected($field['type'], 'radio'); ?>>Radio</option>
-							</select>
-						</td>
-						<td>
-							<!-- Campos para definir as opções -->
-							<div class="options-container" <?php echo in_array($field['type'], ['select', 'checkbox', 'radio']) ? '' : 'style="display:none;"'; ?>>
+                    <tr>
+                        <td>
+                            <input type="text" name="custom_fields[<?php echo $index; ?>][name]" value="<?php echo esc_attr($field['name'] ?? ''); ?>" required />
+                        </td>
+                        <td>
+                            <select name="custom_fields[<?php echo $index; ?>][type]" class="field-type">
+                                <option value="text" <?php selected($field['type'], 'text'); ?>>Texto</option>
+                                <option value="email" <?php selected($field['type'], 'email'); ?>>Email</option>
+                                <option value="number" <?php selected($field['type'], 'number'); ?>>Número</option>
+                                <option value="date" <?php selected($field['type'], 'date'); ?>>Data</option>
+                                <option value="select" <?php selected($field['type'], 'select'); ?>>Seleção</option>
+                                <option value="checkbox" <?php selected($field['type'], 'checkbox'); ?>>Checkbox</option>
+                                <option value="radio" <?php selected($field['type'], 'radio'); ?>>Radio</option>
+                            </select>
+                        </td>
+                        <td>
+                            <!-- Campos para definir as opções -->
+                            <div class="options-container" <?php echo in_array($field['type'], ['select', 'checkbox', 'radio']) ? '' : 'style="display:none;"'; ?>>
 								<?php if (in_array($field['type'], ['select', 'checkbox', 'radio']) && !empty($field['options'])): ?>
 									<?php foreach ($field['options'] as $option): ?>
-										<div class="option-row">
-											<input type="text" name="custom_fields[<?php echo $index; ?>][options][]" value="<?php echo esc_attr($option); ?>" />
+                                        <div class="option-row">
+                                            <input type="text" name="custom_fields[<?php echo $index; ?>][options][]" value="<?php echo esc_attr($option); ?>" />
                                             <button type="button" class="button remove-option">Remover</button>
-										</div>
+                                        </div>
                                         <br>
 									<?php endforeach; ?>
 								<?php endif; ?>
                                 <br>
-								<button type="button" class="button button-primary add-option">Adicionar Opção</button>
+                                <button type="button" class="button button-primary add-option">Adicionar Opção</button>
                                 <br>
                                 <br>
-							</div>
-						</td>
-						<td>
-							<button type="button" class="button remove-field">Remover</button>
-						</td>
-					</tr>
+                            </div>
+                        </td>
+                        <td>
+                            <button type="button" class="button remove-field">Remover</button>
+                        </td>
+                    </tr>
 				<?php endforeach; ?>
-			</table>
-			<button type="button" class="button" id="add-field">Adicionar Campo</button>
-			<input type="submit" name="custom_fields_submit" class="button button-primary" value="Salvar Campos" />
-		</form>
-	</div>
+            </table>
+            <button type="button" class="button" id="add-field">Adicionar Campo</button>
+            <input type="submit" name="custom_fields_submit" class="button button-primary" value="Salvar Campos" />
+        </form>
+    </div>
 
-	<script>
+    <script>
         document.getElementById('add-field').addEventListener('click', function() {
             var table = document.querySelector('.form-table');
             var rowCount = table.rows.length;
@@ -125,6 +127,9 @@ function custom_fields_page() {
                 '<td>' +
                 '<select name="custom_fields[' + rowCount + '][type]" class="field-type">' +
                 '<option value="text">Texto</option>' +
+                '<option value="email">Email</option>' +
+                '<option value="number">Número</option>' +
+                '<option value="date">Data</option>' +
                 '<option value="select">Seleção</option>' +
                 '<option value="checkbox">Checkbox</option>' +
                 '<option value="radio">Radio</option>' +
@@ -169,6 +174,6 @@ function custom_fields_page() {
                 }
             }
         });
-	</script>
+    </script>
 	<?php
 }
