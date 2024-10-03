@@ -170,6 +170,10 @@ add_action('edit_user_profile_update', 'dokan_save_custom_profile_fields');
  */
 function add_custom_fields_to_edit_account(): void
 {
+	// TODO: Verifica se o utilizador está se registrando como vendedor
+	if (!is_seller_registration()) {
+		return; // Se não for um vendedor, não exibir os campos
+	}
 
 	// TODO: Recuperar os campos personalizados do banco de dados
 	$custom_fields = get_option('custom_registration_fields', []);
