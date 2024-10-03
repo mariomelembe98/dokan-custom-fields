@@ -4,8 +4,7 @@
 /**
  * @return bool
  */
-function is_seller_registration()
-{
+function is_seller_registration(): bool {
 	if (isset($_POST['role']) && $_POST['role'] === 'seller') {
 		return true;
 	}
@@ -16,10 +15,9 @@ function is_seller_registration()
 /**
  * @return void
  */
-function render_dynamic_fields()
-{
+function render_dynamic_fields(): void {
 
-	// Verifica se o usuário está se registrando como vendedor
+	// Verifica se o utilizador está se registrando como vendedor
 	// if (!is_seller_registration()) {
 	// 	return; // Se não for um vendedor, não exibir os campos
 	// }
@@ -32,13 +30,13 @@ function render_dynamic_fields()
 		foreach ($custom_fields as $field) {
 			$field_name = esc_attr($field['name']);
 			$field_type = esc_attr($field['type']);
-			$field_options = isset($field['options']) ? $field['options'] : [];
+			$field_options = $field['options'] ?? [];
 			$field_label = isset($field['label']) ? esc_html($field['label']) : ucfirst($field_name);
 
 			// Recuperar o valor atual do campo para o usuário logado
 			$field_value = get_user_meta(get_current_user_id(), $field_name, true);
 
-			// Renderizar os campos de acordo com o tipo
+			// Renderizar os campos conforme o tipo
 			switch ($field_type) {
 				case 'text':
 ?>
@@ -119,7 +117,7 @@ function render_dynamic_fields()
 						<label for="<?php echo $field_name; ?>"><?php echo $field_label; ?></label>
 						<input type="number" class="input-text form-control" name="<?php echo $field_name; ?>" id="<?php echo $field_name; ?>" value="<?php echo esc_attr($field_value); ?>" />
 					</p>
-<?php
+                <?php
 					break;
 
 				default:
@@ -140,8 +138,7 @@ add_action('dokan_seller_registration_field_after', 'render_dynamic_fields');
  *
  * @return void
  */
-function save_dynamic_fields($customer_id)
-{
+function save_dynamic_fields($customer_id): void {
 	$custom_fields = get_option('custom_registration_fields');
 
 	if ($custom_fields && is_array($custom_fields)) {

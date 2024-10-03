@@ -1,12 +1,11 @@
 <?php
-// Adicionar um menu ao admin para gerenciar campos personalizados
+// Adicionar um menu ao admin para gerir campos personalizados
 add_action('admin_menu', 'custom_fields_menu');
 
 /**
  * Adiciona uma página de menu para gerenciar campos personalizados
  */
-function custom_fields_menu()
-{
+function custom_fields_menu(): void {
     add_menu_page(
         'Custom Fields',        // Título da página
         'Custom Fields',        // Título do menu
@@ -19,9 +18,8 @@ function custom_fields_menu()
 }
 
 // Página de gerenciamento de campos personalizados
-function custom_fields_page()
-{
-    // Verifica se o usuário tem permissão
+function custom_fields_page(): void {
+    // Verifica se o utilizador tem permissão
     if (!current_user_can('manage_options')) {
         return;
     }
