@@ -5,10 +5,11 @@
  * @return bool
  */
 function is_seller_registration(): bool {
-	if (isset($_POST['role']) && $_POST['role'] === 'seller') {
+	if (current_user_can('seller')) {
 		return true;
+	} else {
+		return false;
 	}
-	return false;
 }
 
 // TODO: Renderizar campos dinâmicos no registro
@@ -39,7 +40,7 @@ function render_dynamic_fields(): void {
 			// Renderizar os campos conforme o tipo
 			switch ($field_type) {
 				case 'text':
-?>
+            ?>
 					<p class="form-row form-group form-row-wide">
 						<label for="<?php echo $field_name; ?>"><?php echo $field_label; ?></label>
 						<input type="text" class="input-text form-control" name="<?php echo $field_name; ?>" id="<?php echo $field_name; ?>" value="<?php echo esc_attr($field_value); ?>" />
