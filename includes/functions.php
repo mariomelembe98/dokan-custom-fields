@@ -1,153 +1,181 @@
 <?php
 // TODO: don't call the file directly
-if ( ! defined( 'ABSPATH' ) ) {
+if (! defined('ABSPATH')) {
 	exit;
 }
 
-function custom_plugin_styles(): void {
+/**
+ * @return void
+ */
+function custom_plugin_styles(): void
+{
 	if (is_plugin_active('dokan-custom-fields/dokan-custom-fields.php')) {
 		wp_enqueue_style('custom-plugin-styles', plugins_url('/css/styles.css', __FILE__));
 	}
 }
 add_action('wp_enqueue_scripts', 'custom_plugin_styles');
 
-add_action( 'dokan_seller_registration_field_after', 'dokan_custom_registration_fields' );
-function dokan_custom_registration_fields(): void {
+add_action('dokan_seller_registration_field_after', 'dokan_custom_registration_fields');
+/**
+ * @return void
+ */
+function dokan_custom_registration_fields(): void
+{
 	$countries = WC()->countries->get_countries();
 	$states = WC()->countries->get_states();
 
-	?>
+?>
 	<p class="form-row form-group form-row-wide">
-		<label for="country"><?php esc_html_e( 'País', 'dokan' ); ?> <span class="required">*</span></label>
+		<label for="country"><?php esc_html_e('País', 'dokan'); ?> <span class="required">*</span></label>
 		<select name="country" id="country" class="input-text form-control" required="required">
-			<option value=""><?php esc_html_e( 'Select a country...', 'dokan' ); ?></option>
-			<?php foreach ( $countries as $key => $value ) : ?>
-				<option value="<?php echo esc_attr( $key ); ?>"><?php echo esc_html( $value ); ?></option>
+			<option value=""><?php esc_html_e('Select a country...', 'dokan'); ?></option>
+			<?php foreach ($countries as $key => $value) : ?>
+				<option value="<?php echo esc_attr($key); ?>"><?php echo esc_html($value); ?></option>
 			<?php endforeach; ?>
 		</select>
 	</p>
 	<p class="form-row form-group form-row-wide">
-		<label for="state"><?php esc_html_e( 'Província', 'dokan' ); ?> <span class="required">*</span></label>
+		<label for="state"><?php esc_html_e('Província', 'dokan'); ?> <span class="required">*</span></label>
 		<select name="state" id="state" class="input-text form-control" required="required">
-			<option value=""><?php esc_html_e( 'Seleccione Província...', 'dokan' ); ?></option>
+			<option value=""><?php esc_html_e('Seleccione Província...', 'dokan'); ?></option>
 		</select>
 	</p>
 	<p class="form-row form-group form-row-wide">
-		<label for="street_1"><?php esc_html_e( 'Endereço 1', 'dokan' ); ?> <span class="required">*</span></label>
+		<label for="street_1"><?php esc_html_e('Endereço 1', 'dokan'); ?> <span class="required">*</span></label>
 		<input type="text" class="input-text form-control" name="street_1" id="street_1" value="" required="required" />
 	</p>
 	<p class="form-row form-group form-row-wide">
-		<label for="street_2"><?php esc_html_e( 'Endereço 2', 'dokan' ); ?></label>
+		<label for="street_2"><?php esc_html_e('Endereço 2', 'dokan'); ?></label>
 		<input type="text" class="input-text form-control" name="street_2" id="street_2" value="" />
 	</p>
 	<p class="form-row form-group form-row-wide">
-		<label for="city"><?php esc_html_e( 'Cidade', 'dokan' ); ?> <span class="required">*</span></label>
+		<label for="city"><?php esc_html_e('Cidade', 'dokan'); ?> <span class="required">*</span></label>
 		<input type="text" class="input-text form-control" name="city" id="city" value="" required="required" />
 	</p>
 
 	<script type="text/javascript">
-        jQuery(document).ready(function($) {
-            var states = <?php echo json_encode($states); ?>;
+		jQuery(document).ready(function($) {
+			var states = <?php echo json_encode($states); ?>;
 
-            $('#country').change(function() {
-                var country = $(this).val();
-                var stateSelect = $('#state');
-                stateSelect.empty().append('<option value=""><?php esc_html_e( 'Select a state...', 'dokan' ); ?></option>');
+			$('#country').change(function() {
+				var country = $(this).val();
+				var stateSelect = $('#state');
+				stateSelect.empty().append('<option value=""><?php esc_html_e('Select a state...', 'dokan'); ?></option>');
 
-                if (states[country]) {
-                    $.each(states[country], function(index, value) {
-                        stateSelect.append('<option value="' + index + '">' + value + '</option>');
-                    });
-                }
-            });
-        });
+				if (states[country]) {
+					$.each(states[country], function(index, value) {
+						stateSelect.append('<option value="' + index + '">' + value + '</option>');
+					});
+				}
+			});
+		});
 	</script>
-	<?php
+<?php
 }
 
-add_filter( 'woocommerce_registration_errors', 'dokan_custom_registration_validation', 10, 3 );
-function dokan_custom_registration_validation( $errors, $username, $email ) {
-	if ( empty( $_POST['country'] ) ) {
-		$errors->add( 'country_error', __( 'Please select your Country.', 'dokan' ) );
+add_filter('woocommerce_registration_errors', 'dokan_custom_registration_validation', 10, 3);
+/**
+ * @param $errors
+ * @param $username
+ * @param $email
+ *
+ * @return mixed
+ */
+function dokan_custom_registration_validation($errors, $username, $email)
+{
+	if (empty($_POST['country'])) {
+		$errors->add('country_error', __('Please select your Country.', 'dokan'));
 	}
-	if ( empty( $_POST['state'] ) ) {
-		$errors->add( 'state_error', __( 'Please select your State.', 'dokan' ) );
+	if (empty($_POST['state'])) {
+		$errors->add('state_error', __('Please select your State.', 'dokan'));
 	}
-	if ( empty( $_POST['street_1'] ) ) {
-		$errors->add( 'street_1_error', __( 'Please enter your Street Address 1.', 'dokan' ) );
+	if (empty($_POST['street_1'])) {
+		$errors->add('street_1_error', __('Please enter your Street Address 1.', 'dokan'));
 	}
-	if ( empty( $_POST['city'] ) ) {
-		$errors->add( 'city_error', __( 'Please enter your City.', 'dokan' ) );
+	if (empty($_POST['city'])) {
+		$errors->add('city_error', __('Please enter your City.', 'dokan'));
 	}
 	return $errors;
 }
 
-add_action( 'woocommerce_created_customer', 'dokan_save_custom_registration_fields' );
-function dokan_save_custom_registration_fields( $customer_id ): void {
-	if ( isset( $_POST['country'] ) ) {
-		update_user_meta( $customer_id, 'country', sanitize_text_field( $_POST['country'] ) );
+add_action('woocommerce_created_customer', 'dokan_save_custom_registration_fields');
+/**
+ * @param $customer_id
+ *
+ * @return void
+ */
+function dokan_save_custom_registration_fields($customer_id): void
+{
+	if (isset($_POST['country'])) {
+		update_user_meta($customer_id, 'country', sanitize_text_field($_POST['country']));
 	}
-	if ( isset( $_POST['state'] ) ) {
-		update_user_meta( $customer_id, 'state', sanitize_text_field( $_POST['state'] ) );
+	if (isset($_POST['state'])) {
+		update_user_meta($customer_id, 'state', sanitize_text_field($_POST['state']));
 	}
-	if ( isset( $_POST['street_1'] ) ) {
-		update_user_meta( $customer_id, 'street_1', sanitize_text_field( $_POST['street_1'] ) );
+	if (isset($_POST['street_1'])) {
+		update_user_meta($customer_id, 'street_1', sanitize_text_field($_POST['street_1']));
 	}
-	if ( isset( $_POST['street_2'] ) ) {
-		update_user_meta( $customer_id, 'street_2', sanitize_text_field( $_POST['street_2'] ) );
+	if (isset($_POST['street_2'])) {
+		update_user_meta($customer_id, 'street_2', sanitize_text_field($_POST['street_2']));
 	}
-	if ( isset( $_POST['city'] ) ) {
-		update_user_meta( $customer_id, 'city', sanitize_text_field( $_POST['city'] ) );
+	if (isset($_POST['city'])) {
+		update_user_meta($customer_id, 'city', sanitize_text_field($_POST['city']));
 	}
 }
 
 // TODO: Exibir campos personalizados no perfil do vendedor
 add_action('dokan_seller_meta_fields', 'dokan_custom_profile_fields');
-function dokan_custom_profile_fields( $user ): void {
-	$country = get_user_meta( $user->ID, 'country', true );
-	$state = get_user_meta( $user->ID, 'state', true );
-	$street_1 = get_user_meta( $user->ID, 'street_1', true );
-	$street_2 = get_user_meta( $user->ID, 'street_2', true );
-	$city = get_user_meta( $user->ID, 'city', true );
+/**
+ * @param $user
+ *
+ * @return void
+ */
+function dokan_custom_profile_fields($user): void
+{
+	$country = get_user_meta($user->ID, 'country', true);
+	$state = get_user_meta($user->ID, 'state', true);
+	$street_1 = get_user_meta($user->ID, 'street_1', true);
+	$street_2 = get_user_meta($user->ID, 'street_2', true);
+	$city = get_user_meta($user->ID, 'city', true);
 
 	$countries = WC()->countries->get_countries();
 	$states = WC()->countries->get_states();
 
-	?>
+?>
 	<tr>
-		<th><?php esc_html_e( 'Country', 'dokan' ); ?></th>
+		<th><?php esc_html_e('Country', 'dokan'); ?></th>
 		<td>
 			<select name="country" class="regular-text">
-				<?php foreach ( $countries as $key => $value ) : ?>
-					<option value="<?php echo esc_attr( $key ); ?>" <?php selected( $country, $key ); ?>><?php echo esc_html( $value ); ?></option>
+				<?php foreach ($countries as $key => $value) : ?>
+					<option value="<?php echo esc_attr($key); ?>" <?php selected($country, $key); ?>><?php echo esc_html($value); ?></option>
 				<?php endforeach; ?>
 			</select>
 		</td>
 	</tr>
 	<tr>
-		<th><?php esc_html_e( 'State', 'dokan' ); ?></th>
+		<th><?php esc_html_e('State', 'dokan'); ?></th>
 		<td>
 			<select name="state" class="regular-text">
-				<option value=""><?php esc_html_e( 'Select a state...', 'dokan' ); ?></option>
-				<?php if ( $country && isset( $states[$country] ) ) : ?>
-					<?php foreach ( $states[$country] as $key => $value ) : ?>
-						<option value="<?php echo esc_attr( $key ); ?>" <?php selected( $state, $key ); ?>><?php echo esc_html( $value ); ?></option>
+				<option value=""><?php esc_html_e('Select a state...', 'dokan'); ?></option>
+				<?php if ($country && isset($states[$country])) : ?>
+					<?php foreach ($states[$country] as $key => $value) : ?>
+						<option value="<?php echo esc_attr($key); ?>" <?php selected($state, $key); ?>><?php echo esc_html($value); ?></option>
 					<?php endforeach; ?>
 				<?php endif; ?>
 			</select>
 		</td>
 	</tr>
 	<tr>
-		<th><?php esc_html_e( 'Street Address 1', 'dokan' ); ?></th>
-		<td><input type="text" class="regular-text" name="street_1" value="<?php echo esc_attr( $street_1 ); ?>" /></td>
+		<th><?php esc_html_e('Street Address 1', 'dokan'); ?></th>
+		<td><input type="text" class="regular-text" name="street_1" value="<?php echo esc_attr($street_1); ?>" /></td>
 	</tr>
 	<tr>
-		<th><?php esc_html_e( 'Street Address 2', 'dokan' ); ?></th>
-		<td><input type="text" class="regular-text" name="street_2" value="<?php echo esc_attr( $street_2 ); ?>" /></td>
+		<th><?php esc_html_e('Street Address 2', 'dokan'); ?></th>
+		<td><input type="text" class="regular-text" name="street_2" value="<?php echo esc_attr($street_2); ?>" /></td>
 	</tr>
 	<tr>
-		<th><?php esc_html_e( 'City', 'dokan' ); ?></th>
-		<td><input type="text" class="regular-text" name="city" value="<?php echo esc_attr( $city ); ?>" /></td>
+		<th><?php esc_html_e('City', 'dokan'); ?></th>
+		<td><input type="text" class="regular-text" name="city" value="<?php echo esc_attr($city); ?>" /></td>
 	</tr>
 	<?php
 
@@ -163,18 +191,18 @@ function dokan_custom_profile_fields( $user ): void {
 
 			switch ($field_type) {
 				case 'text':
-					?>
+	?>
 					<tr>
 						<th><?php echo ucfirst($field_name); ?></th>
 						<td>
 							<input type="text" name="<?php echo $field_name; ?>" value="<?php echo esc_attr($field_value); ?>" class="regular-text" />
 						</td>
 					</tr>
-					<?php
+				<?php
 					break;
 
 				case 'select':
-					?>
+				?>
 					<tr>
 						<th><?php echo ucfirst($field_name); ?></th>
 						<td>
@@ -186,11 +214,11 @@ function dokan_custom_profile_fields( $user ): void {
 							</select>
 						</td>
 					</tr>
-					<?php
+				<?php
 					break;
 
 				case 'checkbox':
-					?>
+				?>
 					<tr>
 						<th><?php echo ucfirst($field_name); ?></th>
 						<td>
@@ -202,11 +230,11 @@ function dokan_custom_profile_fields( $user ): void {
 							<?php endforeach; ?>
 						</td>
 					</tr>
-					<?php
+				<?php
 					break;
 
 				case 'radio':
-					?>
+				?>
 					<tr>
 						<th><?php echo ucfirst($field_name); ?></th>
 						<td>
@@ -218,7 +246,7 @@ function dokan_custom_profile_fields( $user ): void {
 							<?php endforeach; ?>
 						</td>
 					</tr>
-					<?php
+				<?php
 					break;
 
 				default:
@@ -227,23 +255,28 @@ function dokan_custom_profile_fields( $user ): void {
 			}
 		}
 	}
-
 }
 
 // TODO: Salvar dados dos campos personalizados no perfil do usuário
-function dokan_save_custom_profile_fields( $user_id ) {
+/**
+ * @param $user_id
+ *
+ * @return false|void
+ */
+function dokan_save_custom_profile_fields($user_id)
+{
 
 	// TODO: Verifica se o usuário tem permissão para editar
 	if (!current_user_can('edit_user', $user_id)) {
 		return false;
 	}
 
-	if ( current_user_can( 'edit_user', $user_id ) ) {
-		update_user_meta( $user_id, 'country', sanitize_text_field( $_POST['country'] ) );
-		update_user_meta( $user_id, 'state', sanitize_text_field( $_POST['state'] ) );
-		update_user_meta( $user_id, 'street_1', sanitize_text_field( $_POST['street_1'] ) );
-		update_user_meta( $user_id, 'street_2', sanitize_text_field( $_POST['street_2'] ) );
-		update_user_meta( $user_id, 'city', sanitize_text_field( $_POST['city'] ) );
+	if (current_user_can('edit_user', $user_id)) {
+		update_user_meta($user_id, 'country', sanitize_text_field($_POST['country']));
+		update_user_meta($user_id, 'state', sanitize_text_field($_POST['state']));
+		update_user_meta($user_id, 'street_1', sanitize_text_field($_POST['street_1']));
+		update_user_meta($user_id, 'street_2', sanitize_text_field($_POST['street_2']));
+		update_user_meta($user_id, 'city', sanitize_text_field($_POST['city']));
 	}
 
 	$custom_fields = get_option('custom_registration_fields', []);
@@ -287,14 +320,16 @@ function dokan_save_custom_profile_fields( $user_id ) {
 			}
 		}
 	}
-
-
 }
 add_action('personal_options_update', 'dokan_save_custom_profile_fields');
 add_action('edit_user_profile_update', 'dokan_save_custom_profile_fields');
 
 // TODO: Exibir campos personalizados na página de Editar Conta
-function add_custom_fields_to_edit_account(): void {
+/**
+ * @return void
+ */
+function add_custom_fields_to_edit_account(): void
+{
 	// TODO: Recuperar os campos personalizados do banco de dados
 	$custom_fields = get_option('custom_registration_fields', []);
 
@@ -309,91 +344,90 @@ function add_custom_fields_to_edit_account(): void {
 			// TODO: Recuperar o valor atual do campo para o usuário logado
 			$field_value = get_user_meta(get_current_user_id(), $field_name, true);
 
-            // TODO: Renderizar os campos de acordo com o tipo
+			// TODO: Renderizar os campos de acordo com o tipo
 			switch ($field_type) {
 				case 'text':
-					?>
-                    <p class="form-row form-group form-row-wide">
-                        <label for="<?php echo $field_name; ?>"><?php echo $field_label; ?></label>
-                        <input type="text" class="input-text form-control" name="<?php echo $field_name; ?>" id="<?php echo $field_name; ?>" value="<?php echo esc_attr($field_value); ?>" />
-                    </p>
-					<?php
+				?>
+					<p class="form-row form-group form-row-wide">
+						<label for="<?php echo $field_name; ?>"><?php echo $field_label; ?></label>
+						<input type="text" class="input-text form-control" name="<?php echo $field_name; ?>" id="<?php echo $field_name; ?>" value="<?php echo esc_attr($field_value); ?>" />
+					</p>
+				<?php
 					break;
 
 				case 'email':
-					?>
-                    <p class="form-row form-group form-row-wide">
-                        <label for="<?php echo $field_name; ?>"><?php echo $field_label; ?></label>
-                        <input type="email" class="input-text form-control" name="<?php echo $field_name; ?>" id="<?php echo $field_name; ?>" value="<?php echo esc_attr($field_value); ?>" />
-                    </p>
-					<?php
+				?>
+					<p class="form-row form-group form-row-wide">
+						<label for="<?php echo $field_name; ?>"><?php echo $field_label; ?></label>
+						<input type="email" class="input-text form-control" name="<?php echo $field_name; ?>" id="<?php echo $field_name; ?>" value="<?php echo esc_attr($field_value); ?>" />
+					</p>
+				<?php
 					break;
 
 				case 'number':
-					?>
-                    <p class="form-row form-group form-row-wide">
-                        <label for="<?php echo $field_name; ?>"><?php echo $field_label; ?></label>
-                        <input type="number" class="input-text form-control" name="<?php echo $field_name; ?>" id="<?php echo $field_name; ?>" value="<?php echo esc_attr($field_value); ?>" />
-                    </p>
-					<?php
+				?>
+					<p class="form-row form-group form-row-wide">
+						<label for="<?php echo $field_name; ?>"><?php echo $field_label; ?></label>
+						<input type="number" class="input-text form-control" name="<?php echo $field_name; ?>" id="<?php echo $field_name; ?>" value="<?php echo esc_attr($field_value); ?>" />
+					</p>
+				<?php
 					break;
 
 				case 'date':
-					?>
-                    <p class="form-row form-group form-row-wide">
-                        <label for="<?php echo $field_name; ?>"><?php echo $field_label; ?></label>
-                        <input type="date" class="input-text form-control" name="<?php echo $field_name; ?>" id="<?php echo $field_name; ?>" value="<?php echo esc_attr($field_value); ?>" />
-                    </p>
-					<?php
+				?>
+					<p class="form-row form-group form-row-wide">
+						<label for="<?php echo $field_name; ?>"><?php echo $field_label; ?></label>
+						<input type="date" class="input-text form-control" name="<?php echo $field_name; ?>" id="<?php echo $field_name; ?>" value="<?php echo esc_attr($field_value); ?>" />
+					</p>
+				<?php
 					break;
 
 				case 'select':
-					?>
-                    <p class="form-row form-group form-row-wide">
-                        <label for="<?php echo $field_name; ?>"><?php echo $field_label; ?></label>
-                        <select name="<?php echo $field_name; ?>" id="<?php echo $field_name; ?>" class="input-text form-control">
-                            <option value=""><?php esc_html_e('Selecione uma opção', 'dokan'); ?></option>
+				?>
+					<p class="form-row form-group form-row-wide">
+						<label for="<?php echo $field_name; ?>"><?php echo $field_label; ?></label>
+						<select name="<?php echo $field_name; ?>" id="<?php echo $field_name; ?>" class="input-text form-control">
+							<option value=""><?php esc_html_e('Selecione uma opção', 'dokan'); ?></option>
 							<?php foreach ($field_options as $option): ?>
-                                <option value="<?php echo esc_attr($option); ?>" <?php selected($field_value, $option); ?>><?php echo esc_html($option); ?></option>
+								<option value="<?php echo esc_attr($option); ?>" <?php selected($field_value, $option); ?>><?php echo esc_html($option); ?></option>
 							<?php endforeach; ?>
-                        </select>
-                    </p>
-					<?php
+						</select>
+					</p>
+				<?php
 					break;
 
 				case 'checkbox':
-					?>
-                    <p class="form-row form-group form-row-wide">
-                        <label><?php echo $field_label; ?></label>
+				?>
+					<p class="form-row form-group form-row-wide">
+						<label><?php echo $field_label; ?></label>
 						<?php foreach ($field_options as $option): ?>
-                            <label for="<?php echo $field_name . '_' . esc_attr($option); ?>">
-                                <input type="checkbox" class="input-checkbox" name="<?php echo $field_name; ?>[]" id="<?php echo $field_name . '_' . esc_attr($option); ?>" value="<?php echo esc_attr($option); ?>" <?php checked(is_array($field_value) && in_array($option, $field_value)); ?> />
+							<label for="<?php echo $field_name . '_' . esc_attr($option); ?>">
+								<input type="checkbox" class="input-checkbox" name="<?php echo $field_name; ?>[]" id="<?php echo $field_name . '_' . esc_attr($option); ?>" value="<?php echo esc_attr($option); ?>" <?php checked(is_array($field_value) && in_array($option, $field_value)); ?> />
 								<?php echo esc_html($option); ?>
-                            </label>
+							</label>
 						<?php endforeach; ?>
-                    </p>
-					<?php
+					</p>
+				<?php
 					break;
 
 				case 'radio':
-					?>
-                    <p class="form-row form-group form-row-wide">
-                        <label><?php echo $field_label; ?></label>
+				?>
+					<p class="form-row form-group form-row-wide">
+						<label><?php echo $field_label; ?></label>
 						<?php foreach ($field_options as $option): ?>
-                            <label for="<?php echo $field_name . '_' . esc_attr($option); ?>">
-                                <input type="radio" class="input-radio" name="<?php echo $field_name; ?>" id="<?php echo $field_name . '_' . esc_attr($option); ?>" value="<?php echo esc_attr($option); ?>" <?php checked($field_value, $option); ?> />
+							<label for="<?php echo $field_name . '_' . esc_attr($option); ?>">
+								<input type="radio" class="input-radio" name="<?php echo $field_name; ?>" id="<?php echo $field_name . '_' . esc_attr($option); ?>" value="<?php echo esc_attr($option); ?>" <?php checked($field_value, $option); ?> />
 								<?php echo esc_html($option); ?>
-                            </label>
+							</label>
 						<?php endforeach; ?>
-                    </p>
-					<?php
+					</p>
+<?php
 					break;
 
 				default:
 					// TODO: Outros tipos de campo podem ser tratados aqui
 					break;
 			}
-
 		}
 	}
 }
@@ -401,7 +435,13 @@ add_action('woocommerce_edit_account_form', 'add_custom_fields_to_edit_account')
 
 
 // TODO: Salvar os campos personalizados ao editar a conta
-function save_custom_fields_on_edit_account($user_id): void {
+/**
+ * @param $user_id
+ *
+ * @return void
+ */
+function save_custom_fields_on_edit_account($user_id): void
+{
 	// TODO: Recuperar os campos personalizados
 	$custom_fields = get_option('custom_registration_fields', []);
 
@@ -421,5 +461,3 @@ function save_custom_fields_on_edit_account($user_id): void {
 	}
 }
 add_action('woocommerce_save_account_details', 'save_custom_fields_on_edit_account');
-
-

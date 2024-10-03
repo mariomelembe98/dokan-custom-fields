@@ -5,67 +5,69 @@ add_action('admin_menu', 'custom_fields_menu');
 /**
  * Adiciona uma página de menu para gerenciar campos personalizados
  */
-function custom_fields_menu() {
-	add_menu_page(
-		'Custom Fields',        // Título da página
-		'Custom Fields',        // Título do menu
-		'manage_options',       // Capacidade
-		'custom-fields',       // Slug do menu
-		'custom_fields_page',    // Função que renderiza a página
-		'dashicons-list-view',   // Ícone do menu
-		60                       // Posição no menu
-	);
+function custom_fields_menu()
+{
+    add_menu_page(
+        'Custom Fields',        // Título da página
+        'Custom Fields',        // Título do menu
+        'manage_options',       // Capacidade
+        'custom-fields',       // Slug do menu
+        'custom_fields_page',    // Função que renderiza a página
+        'dashicons-list-view',   // Ícone do menu
+        60                       // Posição no menu
+    );
 }
 
 // Página de gerenciamento de campos personalizados
-function custom_fields_page() {
-	// Verifica se o usuário tem permissão
-	if (!current_user_can('manage_options')) {
-		return;
-	}
+function custom_fields_page()
+{
+    // Verifica se o usuário tem permissão
+    if (!current_user_can('manage_options')) {
+        return;
+    }
 
-	// Salvar campos se o formulário for enviado
-	if (isset($_POST['custom_fields_submit'])) {
-		// Verifica o nonce para segurança
-		check_admin_referer('custom_fields_save', 'custom_fields_nonce');
+    // Salvar campos se o formulário for enviado
+    if (isset($_POST['custom_fields_submit'])) {
+        // Verifica o nonce para segurança
+        check_admin_referer('custom_fields_save', 'custom_fields_nonce');
 
-		$fields = isset($_POST['custom_fields']) ? $_POST['custom_fields'] : [];
+        $fields = isset($_POST['custom_fields']) ? $_POST['custom_fields'] : [];
 
-		// Filtrar e sanitizar campos
-		$fields = array_filter($fields, function($field) {
-			return !empty($field['name']) && !empty($field['type']);
-		});
+        // Filtrar e sanitizar campos
+        $fields = array_filter($fields, function ($field) {
+            return !empty($field['name']) && !empty($field['type']);
+        });
 
-		$fields = array_map(function($field) {
-			$sanitized_field = [
-				'name' => sanitize_text_field($field['name']),
-				'type' => sanitize_text_field($field['type']),
-			];
+        $fields = array_map(function ($field) {
+            $sanitized_field = [
+                'name' => sanitize_text_field($field['name']),
+                'type' => sanitize_text_field($field['type']),
+            ];
 
-			// Se o tipo exigir opções, sanitiza-as
-			if (in_array($field['type'], ['select', 'checkbox', 'radio'])) {
-				if (isset($field['options']) && is_array($field['options'])) {
-					$sanitized_field['options'] = array_map('sanitize_text_field', $field['options']);
-				} else {
-					$sanitized_field['options'] = [];
-				}
-			}
+            // Se o tipo exigir opções, sanitiza-as
+            if (in_array($field['type'], ['select', 'checkbox', 'radio'])) {
+                if (isset($field['options']) && is_array($field['options'])) {
+                    $sanitized_field['options'] = array_map('sanitize_text_field', $field['options']);
+                } else {
+                    $sanitized_field['options'] = [];
+                }
+            }
 
-			return $sanitized_field;
-		}, $fields);
+            return $sanitized_field;
+        }, $fields);
 
-		update_option('custom_registration_fields', $fields);
-		echo '<div class="updated"><p>Campos salvos com sucesso!</p></div>';
-	}
+        update_option('custom_registration_fields', $fields);
+        echo '<div class="updated"><p>Campos salvos com sucesso!</p></div>';
+    }
 
-	// Recuperar campos existentes
-	$custom_fields = get_option('custom_registration_fields', []);
+    // Recuperar campos existentes
+    $custom_fields = get_option('custom_registration_fields', []);
 
-	?>
+?>
     <div class="wrap">
         <h1>Gerenciar Campos Personalizados</h1>
         <form method="post" action="">
-			<?php wp_nonce_field('custom_fields_save', 'custom_fields_nonce'); ?>
+            <?php wp_nonce_field('custom_fields_save', 'custom_fields_nonce'); ?>
             <table class="form-table">
                 <tr>
                     <th>Nome do Campo</th>
@@ -73,7 +75,7 @@ function custom_fields_page() {
                     <th>Opções (para Select, Checkbox, Radio)</th>
                     <th>Ações</th>
                 </tr>
-				<?php foreach ($custom_fields as $index => $field): ?>
+                <?php foreach ($custom_fields as $index => $field): ?>
                     <tr>
                         <td>
                             <input type="text" name="custom_fields[<?php echo $index; ?>][name]" value="<?php echo esc_attr($field['name'] ?? ''); ?>" required />
@@ -92,15 +94,15 @@ function custom_fields_page() {
                         <td>
                             <!-- Campos para definir as opções -->
                             <div class="options-container" <?php echo in_array($field['type'], ['select', 'checkbox', 'radio']) ? '' : 'style="display:none;"'; ?>>
-								<?php if (in_array($field['type'], ['select', 'checkbox', 'radio']) && !empty($field['options'])): ?>
-									<?php foreach ($field['options'] as $option): ?>
+                                <?php if (in_array($field['type'], ['select', 'checkbox', 'radio']) && !empty($field['options'])): ?>
+                                    <?php foreach ($field['options'] as $option): ?>
                                         <div class="option-row">
                                             <input type="text" name="custom_fields[<?php echo $index; ?>][options][]" value="<?php echo esc_attr($option); ?>" />
                                             <button type="button" class="button remove-option">Remover</button>
                                         </div>
                                         <br>
-									<?php endforeach; ?>
-								<?php endif; ?>
+                                    <?php endforeach; ?>
+                                <?php endif; ?>
                                 <br>
                                 <button type="button" class="button button-primary add-option">Adicionar Opção</button>
                                 <br>
@@ -111,7 +113,7 @@ function custom_fields_page() {
                             <button type="button" class="button remove-field">Remover</button>
                         </td>
                     </tr>
-				<?php endforeach; ?>
+                <?php endforeach; ?>
             </table>
             <button type="button" class="button" id="add-field">Adicionar Campo</button>
             <input type="submit" name="custom_fields_submit" class="button button-primary" value="Salvar Campos" />
@@ -175,5 +177,5 @@ function custom_fields_page() {
             }
         });
     </script>
-	<?php
+<?php
 }

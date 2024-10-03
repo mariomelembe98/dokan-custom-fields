@@ -1,7 +1,11 @@
 <?php
 
 // TODO: Função para verificar se o registro é de um vendedor
-function is_seller_registration() {
+/**
+ * @return bool
+ */
+function is_seller_registration()
+{
 	if (isset($_POST['role']) && $_POST['role'] === 'seller') {
 		return true;
 	}
@@ -9,7 +13,11 @@ function is_seller_registration() {
 }
 
 // TODO: Renderizar campos dinâmicos no registro
-function render_dynamic_fields() {
+/**
+ * @return void
+ */
+function render_dynamic_fields()
+{
 
 	// Verifica se o usuário está se registrando como vendedor
 	// if (!is_seller_registration()) {
@@ -33,85 +41,89 @@ function render_dynamic_fields() {
 			// Renderizar os campos de acordo com o tipo
 			switch ($field_type) {
 				case 'text':
-					?>
-                    <p class="form-row form-group form-row-wide">
-                        <label for="<?php echo $field_name; ?>"><?php echo $field_label; ?></label>
-                        <input type="text" class="input-text form-control" name="<?php echo $field_name; ?>" id="<?php echo $field_name; ?>" value="<?php echo esc_attr($field_value); ?>" />
-                    </p>
-					<?php
+?>
+					<p class="form-row form-group form-row-wide">
+						<label for="<?php echo $field_name; ?>"><?php echo $field_label; ?></label>
+						<input type="text" class="input-text form-control" name="<?php echo $field_name; ?>" id="<?php echo $field_name; ?>" value="<?php echo esc_attr($field_value); ?>" />
+					</p>
+				<?php
 					break;
 
 				case 'date':
-					?>
-                    <p class="form-row form-group form-row-wide">
-                        <label for="<?php echo $field_name; ?>"><?php echo $field_label; ?></label>
-                        <input type="date" class="input-text form-control" name="<?php echo $field_name; ?>" id="<?php echo $field_name; ?>" value="<?php echo esc_attr($field_value); ?>" />
-                    </p>
-					<?php
+				?>
+					<p class="form-row form-group form-row-wide">
+						<label for="<?php echo $field_name; ?>"><?php echo $field_label; ?></label>
+						<input type="date" class="input-text form-control" name="<?php echo $field_name; ?>" id="<?php echo $field_name; ?>" value="<?php echo esc_attr($field_value); ?>" />
+					</p>
+				<?php
 					break;
 
 				case 'select':
-					?>
-                    <p class="form-row form-group form-row-wide">
-                        <label for="<?php echo $field_name; ?>"><?php echo $field_label; ?></label>
-                        <select name="<?php echo $field_name; ?>" id="<?php echo $field_name; ?>" class="input-text form-control">
-                            <option value=""><?php esc_html_e('Selecione uma opção', 'dokan'); ?></option>
+				?>
+					<p class="form-row form-group form-row-wide">
+						<label for="<?php echo $field_name; ?>"><?php echo $field_label; ?></label>
+						<select name="<?php echo $field_name; ?>" id="<?php echo $field_name; ?>" class="input-text form-control">
+							<option value=""><?php esc_html_e('Selecione uma opção', 'dokan'); ?></option>
 							<?php foreach ($field_options as $option): ?>
-                                <option value="<?php echo esc_attr($option); ?>" <?php selected($field_value, $option); ?>><?php echo esc_html($option); ?></option>
+								<option value="<?php echo esc_attr($option); ?>" <?php selected($field_value, $option); ?>><?php echo esc_html($option); ?></option>
 							<?php endforeach; ?>
-                        </select>
-                    </p>
-					<?php
+						</select>
+					</p>
+				<?php
 					break;
 
 				case 'checkbox':
-					?>
-                    <p class="form-row form-group form-row-wide">
-                        <label><?php echo $field_label; ?></label>
+				?>
+					<p class="form-row form-group form-row-wide">
+						<label><?php echo $field_label; ?></label>
+						<br>
 						<?php foreach ($field_options as $option): ?>
-                            <label for="<?php echo $field_name . '_' . esc_attr($option); ?>">
-                                <input type="checkbox" class="input-checkbox" name="<?php echo $field_name; ?>[]" id="<?php echo $field_name . '_' . esc_attr($option); ?>" value="<?php echo esc_attr($option); ?>" <?php checked(is_array($field_value) && in_array($option, $field_value)); ?> />
+							<label for="<?php echo $field_name . '_' . esc_attr($option); ?>">
+								<input type="checkbox" class="input-checkbox" name="<?php echo $field_name; ?>[]" id="<?php echo $field_name . '_' . esc_attr($option); ?>" value="<?php echo esc_attr($option); ?>" <?php checked(is_array($field_value) && in_array($option, $field_value)); ?> />
 								<?php echo esc_html($option); ?>
-                            </label>
+							</label>
+							<br>
 						<?php endforeach; ?>
-                    </p>
-					<?php
+					</p>
+				<?php
 					break;
 
 				case 'radio':
-					?>
-                    <p class="form-row form-group form-row-wide">
-                        <label><?php echo $field_label; ?></label>
+				?>
+					<p class="form-row form-group form-row-wide">
+						<label><?php echo $field_label; ?></label>
+						<br>
 						<?php foreach ($field_options as $option): ?>
-                            <label for="<?php echo $field_name . '_' . esc_attr($option); ?>">
-                                <input type="radio" class="input-radio" name="<?php echo $field_name; ?>" id="<?php echo $field_name . '_' . esc_attr($option); ?>" value="<?php echo esc_attr($option); ?>" <?php checked($field_value, $option); ?> />
+							<label for="<?php echo $field_name . '_' . esc_attr($option); ?>">
+								<input type="radio" class="input-radio" name="<?php echo $field_name; ?>" id="<?php echo $field_name . '_' . esc_attr($option); ?>" value="<?php echo esc_attr($option); ?>" <?php checked($field_value, $option); ?> />
 								<?php echo esc_html($option); ?>
-                            </label>
+							</label>
+							<br>
 						<?php endforeach; ?>
-                    </p>
-					<?php
+					</p>
+				<?php
 					break;
 
 				case 'email':
-					?>
-                    <p class="form-row form-group form-row-wide">
-                        <label for="<?php echo $field_name; ?>"><?php echo $field_label; ?></label>
-                        <input type="email" class="input-text form-control" name="<?php echo $field_name; ?>" id="<?php echo $field_name; ?>" value="<?php echo esc_attr($field_value); ?>" />
-                    </p>
-					<?php
+				?>
+					<p class="form-row form-group form-row-wide">
+						<label for="<?php echo $field_name; ?>"><?php echo $field_label; ?></label>
+						<input type="email" class="input-text form-control" name="<?php echo $field_name; ?>" id="<?php echo $field_name; ?>" value="<?php echo esc_attr($field_value); ?>" />
+					</p>
+				<?php
 					break;
 
 				case 'number':
-					?>
-                    <p class="form-row form-group form-row-wide">
-                        <label for="<?php echo $field_name; ?>"><?php echo $field_label; ?></label>
-                        <input type="number" class="input-text form-control" name="<?php echo $field_name; ?>" id="<?php echo $field_name; ?>" value="<?php echo esc_attr($field_value); ?>" />
-                    </p>
-					<?php
+				?>
+					<p class="form-row form-group form-row-wide">
+						<label for="<?php echo $field_name; ?>"><?php echo $field_label; ?></label>
+						<input type="number" class="input-text form-control" name="<?php echo $field_name; ?>" id="<?php echo $field_name; ?>" value="<?php echo esc_attr($field_value); ?>" />
+					</p>
+<?php
 					break;
 
 				default:
-					// Outros tipos de campo podem ser tratados aqui
+					// TODO: Outros tipos de campo podem ser tratados aqui
 					break;
 			}
 		}
@@ -123,7 +135,13 @@ function render_dynamic_fields() {
 add_action('dokan_seller_registration_field_after', 'render_dynamic_fields');
 
 // TODO: Salvar dados dos campos personalizados
-function save_dynamic_fields($customer_id) {
+/**
+ * @param $customer_id
+ *
+ * @return void
+ */
+function save_dynamic_fields($customer_id)
+{
 	$custom_fields = get_option('custom_registration_fields');
 
 	if ($custom_fields && is_array($custom_fields)) {

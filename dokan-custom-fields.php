@@ -15,18 +15,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-// Define o diretório do plugin
+// TODO: Define o diretório do plugin
 if ( ! defined( 'MV_PLUGIN_DIR' ) ) {
 	define( 'MV_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 }
 
-// Inclui os arquivos de funções
+// TODO: Inclui os arquivos de funções
 require_once MV_PLUGIN_DIR . 'includes/functions.php';
 require_once MV_PLUGIN_DIR . 'includes/dynamic-fields.php';
 require_once MV_PLUGIN_DIR . 'includes/Admin/admin.php';
-
-
-
-
-
-
