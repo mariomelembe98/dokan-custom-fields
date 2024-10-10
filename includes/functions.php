@@ -190,89 +190,9 @@ function add_custom_fields_to_edit_account(): void
 			$field_value = get_user_meta(get_current_user_id(), $field_name, true);
 
 			// TODO: Renderizar os campos de acordo com o tipo
-			switch ($field_type) {
-				case 'text':
-				?>
-					<p class="form-row form-group form-row-wide">
-						<label for="<?php echo $field_name; ?>"><?php echo $field_label; ?></label>
-						<input type="text" class="input-text form-control" name="<?php echo $field_name; ?>" id="<?php echo $field_name; ?>" value="<?php echo esc_attr($field_value); ?>" />
-					</p>
-				<?php
-					break;
+			// Renderiza o campo usando a função genérica
+			render_custom_field($field_name, $field_label, $field_type, $field_value, $field_options);
 
-				case 'email':
-				?>
-					<p class="form-row form-group form-row-wide">
-						<label for="<?php echo $field_name; ?>"><?php echo $field_label; ?></label>
-						<input type="email" class="input-text form-control" name="<?php echo $field_name; ?>" id="<?php echo $field_name; ?>" value="<?php echo esc_attr($field_value); ?>" />
-					</p>
-				<?php
-					break;
-
-				case 'number':
-				?>
-					<p class="form-row form-group form-row-wide">
-						<label for="<?php echo $field_name; ?>"><?php echo $field_label; ?></label>
-						<input type="number" class="input-text form-control" name="<?php echo $field_name; ?>" id="<?php echo $field_name; ?>" value="<?php echo esc_attr($field_value); ?>" />
-					</p>
-				<?php
-					break;
-
-				case 'date':
-				?>
-					<p class="form-row form-group form-row-wide">
-						<label for="<?php echo $field_name; ?>"><?php echo $field_label; ?></label>
-						<input type="date" class="input-text form-control" name="<?php echo $field_name; ?>" id="<?php echo $field_name; ?>" value="<?php echo esc_attr($field_value); ?>" />
-					</p>
-				<?php
-					break;
-
-				case 'select':
-				?>
-					<p class="form-row form-group form-row-wide">
-						<label for="<?php echo $field_name; ?>"><?php echo $field_label; ?></label>
-						<select name="<?php echo $field_name; ?>" id="<?php echo $field_name; ?>" class="input-text form-control">
-							<option value=""><?php esc_html_e('Selecione uma opção', 'dokan'); ?></option>
-							<?php foreach ($field_options as $option): ?>
-								<option value="<?php echo esc_attr($option); ?>" <?php selected($field_value, $option); ?>><?php echo esc_html($option); ?></option>
-							<?php endforeach; ?>
-						</select>
-					</p>
-				<?php
-					break;
-
-				case 'checkbox':
-				?>
-					<p class="form-row form-group form-row-wide">
-						<label><?php echo $field_label; ?></label>
-						<?php foreach ($field_options as $option): ?>
-							<label for="<?php echo $field_name . '_' . esc_attr($option); ?>">
-								<input type="checkbox" class="input-checkbox" name="<?php echo $field_name; ?>[]" id="<?php echo $field_name . '_' . esc_attr($option); ?>" value="<?php echo esc_attr($option); ?>" <?php checked(is_array($field_value) && in_array($option, $field_value)); ?> />
-								<?php echo esc_html($option); ?>
-							</label>
-						<?php endforeach; ?>
-					</p>
-				<?php
-					break;
-
-				case 'radio':
-				?>
-					<p class="form-row form-group form-row-wide">
-						<label><?php echo $field_label; ?></label>
-						<?php foreach ($field_options as $option): ?>
-							<label for="<?php echo $field_name . '_' . esc_attr($option); ?>">
-								<input type="radio" class="input-radio" name="<?php echo $field_name; ?>" id="<?php echo $field_name . '_' . esc_attr($option); ?>" value="<?php echo esc_attr($option); ?>" <?php checked($field_value, $option); ?> />
-								<?php echo esc_html($option); ?>
-							</label>
-						<?php endforeach; ?>
-					</p>
-                    <?php
-					break;
-
-				default:
-					// TODO: Outros tipos de campo podem ser tratados aqui
-					break;
-			}
 		}
 	}
 }
@@ -306,3 +226,139 @@ function save_custom_fields_on_edit_account($user_id): void
 	}
 }
 add_action('woocommerce_save_account_details', 'save_custom_fields_on_edit_account');
+
+/**
+ * Função que adiciona campos personalizados à página Become a Vendor.
+ */
+function add_custom_fields_to_become_vendor_form(): void {
+	// Recuperar os campos personalizados do banco de dados
+	$custom_fields = get_option('custom_registration_fields', []);
+
+	// Verificar se há campos a serem renderizados
+	if (!empty($custom_fields)) {
+		foreach ($custom_fields as $field) {
+			$field_name = esc_attr($field['name']);
+			$field_type = esc_attr($field['type']);
+			$field_options = $field['options'] ?? [];
+			$field_label = isset($field['label']) ? esc_html($field['label']) : ucfirst($field_name);
+
+			// Recuperar o valor atual do campo para o usuário logado
+			$user_id = get_current_user_id();
+			$field_value = get_user_meta($user_id, $field_name, true);
+
+			// Renderizar os campos conforme o tipo
+			// Renderiza o campo usando a função genérica
+			render_custom_field($field_name, $field_label, $field_type, $field_value, $field_options);
+
+		}
+	}
+}
+
+// Hook para adicionar os campos personalizados após os campos padrão na página "Become a Vendor"
+add_action( 'dokan_after_seller_migration_fields', 'add_custom_fields_to_become_vendor_form' );
+
+/**
+ * Função para renderizar campos personalizados de diferentes tipos.
+ *
+ * @param string $field_name O nome do campo.
+ * @param string $field_label O rótulo (label) do campo.
+ * @param string $field_type O tipo do campo (text, email, number, etc.).
+ * @param string $field_value O valor atual do campo.
+ * @param array $field_options As opções do campo (para select, checkbox, radio).
+ */
+function render_custom_field($field_name, $field_label, $field_type, $field_value = '', $field_options = []): void {
+	switch ($field_type) {
+		case 'text':
+		case 'email':
+		case 'number':
+		case 'date':
+			?>
+            <p class="form-row form-group form-row-wide">
+                <label for="<?php echo esc_attr($field_name); ?>"><?php echo esc_html($field_label); ?></label>
+                <input type="<?php echo esc_attr($field_type); ?>" class="input-text form-control" name="<?php echo esc_attr($field_name); ?>" id="<?php echo esc_attr($field_name); ?>" value="<?php echo esc_attr($field_value); ?>" />
+            </p>
+			<?php
+			break;
+
+		case 'select':
+			?>
+            <p class="form-row form-group form-row-wide">
+                <label for="<?php echo esc_attr($field_name); ?>"><?php echo esc_html($field_label); ?></label>
+                <select name="<?php echo esc_attr($field_name); ?>" id="<?php echo esc_attr($field_name); ?>" class="input-text form-control">
+                    <option value=""><?php esc_html_e('Selecione uma opção', 'dokan'); ?></option>
+					<?php foreach ($field_options as $option): ?>
+                        <option value="<?php echo esc_attr($option); ?>" <?php selected($field_value, $option); ?>><?php echo esc_html($option); ?></option>
+					<?php endforeach; ?>
+                </select>
+            </p>
+			<?php
+			break;
+
+		case 'checkbox':
+			?>
+            <p class="form-row form-group form-row-wide">
+                <label><?php echo esc_html($field_label); ?></label>
+				<?php foreach ($field_options as $option): ?>
+                    <label for="<?php echo esc_attr($field_name) . '_' . esc_attr($option); ?>">
+                        <input type="checkbox" class="input-checkbox" name="<?php echo esc_attr($field_name); ?>[]" id="<?php echo esc_attr($field_name) . '_' . esc_attr($option); ?>" value="<?php echo esc_attr($option); ?>" <?php checked(is_array($field_value) && in_array($option, $field_value)); ?> />
+						<?php echo esc_html($option); ?>
+                    </label>
+				<?php endforeach; ?>
+            </p>
+			<?php
+			break;
+
+		case 'radio':
+			?>
+            <p class="form-row form-group form-row-wide">
+                <label><?php echo esc_html($field_label); ?></label>
+				<?php foreach ($field_options as $option): ?>
+                    <label for="<?php echo esc_attr($field_name) . '_' . esc_attr($option); ?>">
+                        <input type="radio" class="input-radio" name="<?php echo esc_attr($field_name); ?>" id="<?php echo esc_attr($field_name) . '_' . esc_attr($option); ?>" value="<?php echo esc_attr($option); ?>" <?php checked($field_value, $option); ?> />
+						<?php echo esc_html($option); ?>
+                    </label>
+				<?php endforeach; ?>
+            </p>
+			<?php
+			break;
+
+		default:
+			// Outros tipos de campo podem ser tratados aqui
+			break;
+	}
+}
+
+/**
+ * Função para salvar os campos personalizados após a migração de cliente para vendedor.
+ *
+ * @param int $user_id O ID do usuário que está se tornando vendedor.
+ */
+function save_custom_fields_after_migration($user_id): void {
+	// Verifica se os campos personalizados existem no banco de dados
+	$custom_fields = get_option('custom_registration_fields', []);
+
+	// Se houver campos personalizados, itere sobre eles e salve os valores
+	if (!empty($custom_fields)) {
+		foreach ($custom_fields as $field) {
+			$field_name = esc_attr($field['name']);
+
+			// Verifica se o campo foi enviado no formulário
+			if (isset($_POST[$field_name])) {
+				$field_value = $_POST[$field_name];
+
+				// Se for um checkbox, o valor é um array, então salvamos como uma string serializada
+				if (is_array($field_value)) {
+					$field_value = maybe_serialize($field_value);
+				}
+
+				// Salva o valor no meta do utilizador
+				update_user_meta($user_id, $field_name, sanitize_text_field($field_value));
+			}
+		}
+	}
+}
+
+// Hook para salvar os campos personalizados após o utilizador se tornar vendedor
+add_action('dokan_customer_migration', 'save_custom_fields_after_migration');
+
+
