@@ -163,7 +163,6 @@ function dokan_save_custom_profile_fields($user_id)
 add_action('personal_options_update', 'dokan_save_custom_profile_fields');
 add_action('edit_user_profile_update', 'dokan_save_custom_profile_fields');
 
-
 // TODO: Exibir campos personalizados na página de Editar Conta
 /**
  * @return void
@@ -181,13 +180,16 @@ function add_custom_fields_to_edit_account(): void
 	// TODO: Verificar se há campos a serem renderizados
 	if (!empty($custom_fields)) {
 		foreach ($custom_fields as $field) {
-			$field_name = esc_attr($field['name']);
-			$field_type = esc_attr($field['type']);
-			$field_options = $field['options'] ?? [];
-			$field_label = isset($field['label']) ? esc_html($field['label']) : ucfirst($field_name);
 
-			// TODO: Recuperar o valor atual do campo para o usuário logado
-			$field_value = get_user_meta(get_current_user_id(), $field_name, true);
+			// Chama a função para obter os atributos do campo
+			$field_attributes = get_field_attributes($field);
+
+			// Extrai os valores retornados pela função
+			$field_name = $field_attributes['name'];       // Nome do campo (ex: 'email', 'nome', etc.)
+			$field_type = $field_attributes['type'];       // Tipo do campo (ex: 'text', 'select', etc.)
+			$field_options = $field_attributes['options']; // Opções para selects ou checkboxes
+			$field_label = $field_attributes['label'];     // Rótulo do campo (o que será exibido no formulário)
+			$field_value = $field_attributes['value'];     // Valor actual do campo para o utilizador logado
 
 			// TODO: Renderizar os campos de acordo com o tipo
 			// Renderiza o campo usando a função genérica
@@ -242,7 +244,7 @@ function add_custom_fields_to_become_vendor_form(): void {
 			$field_options = $field['options'] ?? [];
 			$field_label = isset($field['label']) ? esc_html($field['label']) : ucfirst($field_name);
 
-			// Recuperar o valor atual do campo para o usuário logado
+			// Recuperar o valor actual do campo para o usuário logado
 			$user_id = get_current_user_id();
 			$field_value = get_user_meta($user_id, $field_name, true);
 
@@ -266,7 +268,7 @@ add_action( 'dokan_after_seller_migration_fields', 'add_custom_fields_to_become_
  * @param string $field_value O valor atual do campo.
  * @param array $field_options As opções do campo (para select, checkbox, radio).
  */
-function render_custom_field($field_name, $field_label, $field_type, $field_value = '', $field_options = []): void {
+function render_custom_field( string $field_name, string $field_label, string $field_type, $field_value = '', array $field_options = []): void {
 	switch ($field_type) {
 		case 'text':
 		case 'email':
@@ -298,11 +300,13 @@ function render_custom_field($field_name, $field_label, $field_type, $field_valu
 			?>
             <p class="form-row form-group form-row-wide">
                 <label><?php echo esc_html($field_label); ?></label>
+                <br>
 				<?php foreach ($field_options as $option): ?>
                     <label for="<?php echo esc_attr($field_name) . '_' . esc_attr($option); ?>">
                         <input type="checkbox" class="input-checkbox" name="<?php echo esc_attr($field_name); ?>[]" id="<?php echo esc_attr($field_name) . '_' . esc_attr($option); ?>" value="<?php echo esc_attr($option); ?>" <?php checked(is_array($field_value) && in_array($option, $field_value)); ?> />
 						<?php echo esc_html($option); ?>
                     </label>
+                    <br>
 				<?php endforeach; ?>
             </p>
 			<?php
@@ -312,11 +316,13 @@ function render_custom_field($field_name, $field_label, $field_type, $field_valu
 			?>
             <p class="form-row form-group form-row-wide">
                 <label><?php echo esc_html($field_label); ?></label>
+                <br>
 				<?php foreach ($field_options as $option): ?>
                     <label for="<?php echo esc_attr($field_name) . '_' . esc_attr($option); ?>">
                         <input type="radio" class="input-radio" name="<?php echo esc_attr($field_name); ?>" id="<?php echo esc_attr($field_name) . '_' . esc_attr($option); ?>" value="<?php echo esc_attr($option); ?>" <?php checked($field_value, $option); ?> />
 						<?php echo esc_html($option); ?>
                     </label>
+                    <br>
 				<?php endforeach; ?>
             </p>
 			<?php
@@ -329,11 +335,36 @@ function render_custom_field($field_name, $field_label, $field_type, $field_valu
 }
 
 /**
+ * Função que recupera os atributos de um campo personalizado.
+ *
+ * @param array $field Array que contém os dados de um campo.
+ *
+ * @return array Retorna um array com os atributos processados do campo.
+ */
+function get_field_attributes( array $field): array {
+
+	$field_name = esc_attr($field['name']);
+    $field_type = esc_attr($field['type']);
+    $field_options = $field['options'] ?? [];
+    $field_label = isset($field['label']) ? esc_html($field['label']) : ucfirst($field_name);
+    $field_value = get_user_meta(get_current_user_id(), $field_name, true);
+
+	// Retorna todos os atributos do campo num array associativo
+	return [
+		'name' => $field_name,
+		'type' => $field_type,
+		'options' => $field_options,
+		'label' => $field_label,
+		'value' => $field_value,
+	];
+}
+
+/**
  * Função para salvar os campos personalizados após a migração de cliente para vendedor.
  *
  * @param int $user_id O ID do usuário que está se tornando vendedor.
  */
-function save_custom_fields_after_migration($user_id): void {
+function save_custom_fields_after_migration( int $user_id): void {
 	// Verifica se os campos personalizados existem no banco de dados
 	$custom_fields = get_option('custom_registration_fields', []);
 

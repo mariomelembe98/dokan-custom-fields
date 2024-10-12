@@ -29,13 +29,16 @@ function render_dynamic_fields(): void {
 	// Verifica se há campos a serem renderizados
 	if (!empty($custom_fields)) {
 		foreach ($custom_fields as $field) {
-			$field_name = esc_attr($field['name']);
-			$field_type = esc_attr($field['type']);
-			$field_options = $field['options'] ?? [];
-			$field_label = isset($field['label']) ? esc_html($field['label']) : ucfirst($field_name);
 
-			// Recuperar o valor atual do campo para o usuário logado
-			$field_value = get_user_meta(get_current_user_id(), $field_name, true);
+			// Chama a função para obter os atributos do campo
+			$field_attributes = get_field_attributes($field);
+
+			// Extrai os valores retornados pela função
+			$field_name = $field_attributes['name'];       // Nome do campo (ex: 'email', 'nome', etc.)
+			$field_type = $field_attributes['type'];       // Tipo do campo (ex: 'text', 'select', etc.)
+			$field_options = $field_attributes['options']; // Opções para selects ou checkboxes
+			$field_label = $field_attributes['label'];     // Rótulo do campo (o que será exibido no formulário)
+			$field_value = $field_attributes['value'];     // Valor atual do campo para o utilizador logado
 
 			// Renderizar os campos conforme o tipo
 			switch ($field_type) {
@@ -197,4 +200,4 @@ function save_dynamic_fields($customer_id): void {
 		}
 	}
 }
-add_action('woocommerce_created_customer', 'save_dynamic_fields');
+add_action('dokan_new_seller_created', 'save_dynamic_fields');
