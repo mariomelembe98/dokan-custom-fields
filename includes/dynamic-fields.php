@@ -189,13 +189,16 @@ function save_dynamic_fields($customer_id): void {
 						break;
 
 					default:
-						// Se o tipo for inesperado, sanitiza como texto por segurança
+						// Caso o tipo de campo não seja reconhecido, sanitiza como texto
 						$sanitized_value = sanitize_text_field($field_value);
 						break;
 				}
 
-				// Salvar o campo sanitizado no meta do usuário
+				// Salva o valor sanitizado no meta do usuário
 				update_user_meta($customer_id, $field_name, $sanitized_value);
+			} else {
+				// Se o campo não estiver presente no POST, remove o meta do usuário
+				delete_user_meta($customer_id, $field_name);
 			}
 		}
 	}

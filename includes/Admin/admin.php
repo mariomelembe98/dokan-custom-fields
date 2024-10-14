@@ -10,10 +10,10 @@ function custom_fields_menu(): void {
         'Custom Fields',        // Título da página
         'Custom Fields',        // Título do menu
         'manage_options',       // Capacidade
-        'custom-fields',       // Slug do menu
-        'custom_fields_page',    // Função que renderiza a página
-        'dashicons-list-view',   // Ícone do menu
-        60                       // Posição no menu
+        'custom-fields',        // Slug do menu
+        'custom_fields_page',   // Função que renderiza a página
+        'dashicons-list-view',  // Ícone do menu
+        60                      // Posição no menu
     );
 }
 
@@ -113,6 +113,47 @@ function custom_fields_page(): void {
                     </tr>
                 <?php endforeach; ?>
             </table>
+
+            <script>
+                document.addEventListener('change', function(e) {
+                    if (e.target.classList.contains('field-type')) {
+                        const selectedValue = e.target.value;
+                        const inputField = e.target.closest('tr').querySelector('input[type="text"]');
+
+                        // Define values based on the selected option
+                        let newValue = '';
+                        switch (selectedValue) {
+                            case 'text':
+                                newValue = 'Default Text';
+                                break;
+                            case 'email':
+                                newValue = 'Email';
+                                break;
+                            case 'number':
+                                newValue = 'Número';
+                                break;
+                            case 'date':
+                                newValue = 'Data';
+                                break;
+                            case 'select':
+                                newValue = 'Seleção';
+                                break;
+                            case 'checkbox':
+                                newValue = 'Checkbox';
+                                break;
+                            case 'radio':
+                                newValue = 'Radio';
+                                break;
+                            default:
+                                newValue = '';
+                        }
+
+                        // Update the input field value
+                        inputField.value = newValue;
+                    }
+                });
+            </script>
+
             <button type="button" class="button" id="add-field">Adicionar Campo</button>
             <input type="submit" name="custom_fields_submit" class="button button-primary" value="Salvar Campos" />
         </form>
@@ -120,23 +161,29 @@ function custom_fields_page(): void {
 
     <script>
         document.getElementById('add-field').addEventListener('click', function() {
-            var table = document.querySelector('.form-table');
-            var rowCount = table.rows.length;
-            var row = document.createElement('tr');
-            row.innerHTML = '<td><input type="text" name="custom_fields[' + rowCount + '][name]" required /></td>' +
-                '<td>' +
-                '<select name="custom_fields[' + rowCount + '][type]" class="field-type">' +
-                '<option value="text">Texto</option>' +
-                '<option value="email">Email</option>' +
-                '<option value="number">Número</option>' +
-                '<option value="date">Data</option>' +
-                '<option value="select">Seleção</option>' +
-                '<option value="checkbox">Checkbox</option>' +
-                '<option value="radio">Radio</option>' +
-                '</select>' +
-                '</td>' +
-                '<td><div class="options-container" style="display:none;"></div><button type="button" class="button add-option">Adicionar Opção</button></td>' +
-                '<td><button type="button" class="button remove-field">Remover</button></td>';
+            const table = document.querySelector('.form-table');
+            const rowCount = table.rows.length;
+            const row = document.createElement('tr');
+            row.setAttribute('draggable', 'true');
+            row.innerHTML = `
+                <td><input type="text" name="custom_fields[${rowCount}][name]" required /></td>
+                <td>
+                    <select name="custom_fields[${rowCount}][type]" class="field-type">
+                        <option value="text">Texto</option>
+                        <option value="email">Email</option>
+                        <option value="number">Número</option>
+                        <option value="date">Data</option>
+                        <option value="select">Seleção</option>
+                        <option value="checkbox">Checkbox</option>
+                        <option value="radio">Radio</option>
+                    </select>
+                </td>
+                <td>
+                    <div class="options-container" style="display:none;"></div>
+                    <button type="button" class="button add-option">Adicionar Opção</button>
+                </td>
+                <td><button type="button" class="button remove-field">Remover</button></td>
+            `;
             table.appendChild(row);
         });
 
@@ -148,12 +195,14 @@ function custom_fields_page(): void {
             }
 
             if (e.target.classList.contains('add-option')) {
-                var container = e.target.closest('td').querySelector('.options-container');
-                var optionCount = container.querySelectorAll('.option-row').length;
-                var div = document.createElement('div');
+                const container = e.target.closest('td').querySelector('.options-container');
+                const optionCount = container.querySelectorAll('.option-row').length;
+                const div = document.createElement('div');
                 div.className = 'option-row';
-                div.innerHTML = '<input type="text" name="' + e.target.closest('tr').querySelector('select').name.replace('[type]', '[options][]') + '" />' +
-                    '<button type="button" class="button remove-option">Remover</button>';
+                div.innerHTML = `
+                    <input type="text" name="${e.target.closest('tr').querySelector('select').name.replace('[type]', '[options][]')}" />
+                    <button type="button" class="button remove-option">Remover</button>
+                `;
                 container.appendChild(div);
                 container.style.display = 'block';
             }
@@ -163,10 +212,9 @@ function custom_fields_page(): void {
             }
         });
 
-        // Mostrar ou esconder a área de opções conforme o tipo de campo selecionado
         document.addEventListener('change', function(e) {
             if (e.target.classList.contains('field-type')) {
-                var optionsContainer = e.target.closest('tr').querySelector('.options-container');
+                const optionsContainer = e.target.closest('tr').querySelector('.options-container');
                 if (['select', 'checkbox', 'radio'].includes(e.target.value)) {
                     optionsContainer.style.display = 'block';
                 } else {
@@ -174,6 +222,8 @@ function custom_fields_page(): void {
                 }
             }
         });
+
+        
     </script>
 <?php
 }
