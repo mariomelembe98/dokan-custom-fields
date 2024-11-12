@@ -4,9 +4,9 @@
  * Plugin URI: https://mariomelembe.com
  * Description: Adiciona campos personalizados ao registo de vendedores no Dokan.
  * Version: 1.0.0
- * Author: Mario Melembe
+ * Author: Mário Melembe
  * Author URI: https://mariomelembe.com
- *  Requires Plugins: dokan-lite
+ * Requires Plugins: dokan-lite
  * License: GPL2
  */
 

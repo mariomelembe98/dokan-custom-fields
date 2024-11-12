@@ -31,6 +31,7 @@ function dokan_custom_profile_fields($user): void
 
 	if (!empty($custom_fields)) {
 		foreach ($custom_fields as $field) {
+
 			$field_name = esc_attr($field['name']);
 			$field_type = esc_attr($field['type']);
 			$field_options = $field['options'] ?? [];
@@ -38,7 +39,7 @@ function dokan_custom_profile_fields($user): void
 
 			switch ($field_type) {
 				case 'text':
-	            ?>
+				?>
 					<tr>
 						<th><?php echo ucfirst($field_name); ?></th>
 						<td>
@@ -96,6 +97,50 @@ function dokan_custom_profile_fields($user): void
 				<?php
 					break;
 
+				case 'textarea':
+				?>
+					<tr>
+						<th><?php echo ucfirst($field_name); ?></th>
+						<td>
+							<textarea name="<?php echo $field_name; ?>" rows="5" class="regular-text"><?php echo esc_textarea($field_value); ?></textarea>
+						</td>
+					</tr>
+				<?php
+					break;
+
+				case 'email':
+				?>
+					<tr>
+						<th><?php echo ucfirst($field_name); ?></th>
+						<td>
+							<input type="email" name="<?php echo $field_name; ?>" value="<?php echo esc_attr($field_value); ?>" class="regular-text" />
+						</td>
+					</tr>
+				<?php
+					break;
+
+				case 'number':
+				?>
+					<tr>
+						<th><?php echo ucfirst($field_name); ?></th>
+						<td>
+							<input type="number" name="<?php echo $field_name; ?>" value="<?php echo esc_attr($field_value); ?>" class="regular-text" />
+						</td>
+					</tr>
+				<?php
+					break;
+
+				case 'date':
+				?>
+					<tr>
+						<th><?php echo ucfirst($field_name); ?></th>
+						<td>
+							<input type="date" name="<?php echo $field_name; ?>" value="<?php echo esc_attr($field_value); ?>" class="regular-text" />
+						</td>
+					</tr>
+				<?php
+					break;
+
 				default:
 					// TODO: Outros tipos de campo podem ser tratados aqui
 					break;
@@ -103,6 +148,7 @@ function dokan_custom_profile_fields($user): void
 		}
 	}
 }
+
 
 // TODO: Salvar dados dos campos personalizados no perfil do usuário
 /**
@@ -207,11 +253,10 @@ add_action('woocommerce_edit_account_form', 'add_custom_fields_to_edit_account')
  *
  * @return void
  */
-function save_custom_fields_on_edit_account($user_id) {
+function save_custom_fields_on_edit_account($user_id): void
+{
 	// Retrieve custom fields from the database
 	$custom_fields = get_option('custom_registration_fields', []);
-
-	var_dump($custom_fields);
 
 	// Loop through each custom field and save its value
 	foreach ($custom_fields as $field) {
@@ -349,10 +394,8 @@ function render_custom_field( string $field_name, string $field_label, string $f
 			break;
 	}
 }
-
-// Form submission handler
-add_action('woocommerce_save_account_details', 'save_custom_fields');
-function save_custom_fields($user_id) {
+function save_custom_fields($user_id): void
+{
     $custom_fields = get_option('custom_registration_fields', []);
     foreach ($custom_fields as $field) {
         $field_name = $field['name'];
@@ -367,7 +410,8 @@ function save_custom_fields($user_id) {
         }
     }
 }
-
+// Form submission handler
+add_action('woocommerce_save_account_details', 'save_custom_fields');
 
 /**
  * Função que recupera os atributos de um campo personalizado.

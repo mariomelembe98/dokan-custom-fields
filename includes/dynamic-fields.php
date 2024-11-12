@@ -34,7 +34,7 @@ function render_dynamic_fields(): void {
 			$field_attributes = get_field_attributes($field);
 
 			// Extrai os valores retornados pela função
-			$field_name = $field_attributes['name'];       // Nome do campo (ex: 'email', 'nome', etc.)
+			$field_name = $field_attributes['name'];       // Nome do campo (ex: 'endereço eletrónico', 'nome', etc.)
 			$field_type = $field_attributes['type'];       // Tipo do campo (ex: 'text', 'select', etc.)
 			$field_options = $field_attributes['options']; // Opções para selects ou checkboxes
 			$field_label = $field_attributes['label'];     // Rótulo do campo (o que será exibido no formulário)
@@ -194,13 +194,21 @@ function save_dynamic_fields($customer_id): void {
 						break;
 				}
 
-				// Salva o valor sanitizado no meta do usuário
+				// Salva o valor sanitizado no meta do utilizador
 				update_user_meta($customer_id, $field_name, $sanitized_value);
 			} else {
-				// Se o campo não estiver presente no POST, remove o meta do usuário
+				// Se o campo não estiver presente no POST, remove o meta do utilizador
 				delete_user_meta($customer_id, $field_name);
 			}
 		}
 	}
 }
 add_action('dokan_new_seller_created', 'save_dynamic_fields');
+
+// Verifica nonce para segurança
+//function verify_nonce() {
+//    if (!isset($_POST['custom_fields_nonce']) || !wp_verify_nonce($_POST['custom_fields_nonce'], 'custom_fields_save')) {
+//        wp_die(__('Nonce verification failed', 'dokan-custom-fields'));
+//    }
+//}
+//add_action('dokan_new_seller_created', 'verify_nonce', 9);
