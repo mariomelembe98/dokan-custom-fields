@@ -5,14 +5,12 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="7f5ff359-fd46-486d-8901-268663e12d5f" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/dokan-custom-fields.iml" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/material_theme_project_new.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/php.xml" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/dokan-custom-fields.php" beforeDir="false" afterPath="$PROJECT_DIR$/dokan-custom-fields.php" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/includes/Admin/admin.php" beforeDir="false" afterPath="$PROJECT_DIR$/includes/Admin/admin.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/includes/dynamic-fields.php" beforeDir="false" afterPath="$PROJECT_DIR$/includes/dynamic-fields.php" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/includes/functions.php" beforeDir="false" afterPath="$PROJECT_DIR$/includes/functions.php" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -50,24 +48,19 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "git-widget-placeholder": "master",
-    "last_opened_file_path": "C:/laragon/www/mercado",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/laragon/www/mercado&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
-  <component name="QodanaReportsService">
-    <option name="descriptions">
-      <ReportDescription localRun="true" path="C:\Users\USER\AppData\Local\Temp\qodana_output1\qodana.sarif.json" reportGuid="c195291b-518d-4a89-a06b-2456d0f6aaf2" reportId="dokan-custom-fields/qodana/2024-10-12" />
-    </option>
-  </component>
+}</component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
@@ -86,7 +79,10 @@
       <updated>1728707809413</updated>
       <workItem from="1728707811038" duration="226000" />
       <workItem from="1728894442051" duration="212000" />
-      <workItem from="1728894657490" duration="1435000" />
+      <workItem from="1728894657490" duration="4191000" />
+      <workItem from="1728903579869" duration="4963000" />
+      <workItem from="1729322302878" duration="47000" />
+      <workItem from="1731264903301" duration="649000" />
     </task>
     <servers />
   </component>
