@@ -90,8 +90,15 @@ function custom_fields_page(): void {
 				<?php foreach ($custom_fields as $index => $field): ?>
                     <tr>
                         <td>
+                            <label class="label"> Texto a apresentar </label>
+                            <br>
                             <input type="text" name="custom_fields[<?php echo $index; ?>][label]" value="<?php echo esc_attr($field['label'] ?? ''); ?>" required />
-                            <input type="text" name="custom_fields[<?php echo $index; ?>][name]" value="<?php echo esc_attr($field['name'] ?? ''); ?>" />
+                            <br>
+                            <br>
+                            <label class="label"> Nome do campo na base de dados (max: 30 caracteres)</label>
+                            <br>
+                            <input type="text" name="custom_fields[<?php echo $index; ?>][name]" value="<?php echo esc_attr($field['name'] ?? ''); ?>" required />
+
                         </td>
                         <td>
                             <select name="custom_fields[<?php echo $index; ?>][type]" class="field-type">
