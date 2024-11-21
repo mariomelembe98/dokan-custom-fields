@@ -1,0 +1,14 @@
+.validation-error {
+    color: red;
+    font-size: 14px;
+    margin-bottom: 10px;
+}
+
+.error-container {
+    margin-bottom: 20px;
+}
+
+.remove-field{
+    background-color: red!important;
+    color: red;
+}
