@@ -1,3 +1,8 @@
+.ui-state-highlight {
+    background-color: #f0f8ff;
+    height: 2.5em;
+    line-height: 1.2em;
+}
 .validation-error {
     color: red;
     font-size: 14px;
@@ -11,4 +16,10 @@
 .remove-field{
     background-color: red!important;
     color: red;
+}
+
+.horizontal-line {
+    border: 0;
+    border-top: 1px solid #ccc;
+    margin: 10px 0;
 }

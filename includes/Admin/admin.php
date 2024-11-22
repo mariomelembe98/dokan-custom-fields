@@ -19,7 +19,6 @@ function custom_fields_menu(): void {
 
 // Página de gerenciamento de campos personalizados
 function custom_fields_page(): void {
-	// Verifica se o utilizador tem permissão
 	if (!current_user_can('manage_options')) {
 		return;
 	}
@@ -36,39 +35,34 @@ function custom_fields_page(): void {
 			return !empty($field['label']) && !empty($field['type']);
 		});
 
-		$fields = array_map(function ($field) {
-			// Verifica se 'label' existe
-			$sanitized_label = isset($field['label']) ? sanitize_text_field($field['label']) : '';
-			$sanitized_name = isset($field['name']) ? sanitize_text_field($field['name']) : '';
-
-			// Verifica se 'label' existe
-			$sanitized_name = strtolower($sanitized_name); // transforma as letras em minúsculas
-
-			// Substitui espaços por hífens e remove caracteres especiais
-			$sanitized_name = str_replace(' ', '_', $sanitized_name);
-			$sanitized_name = preg_replace('/[^a-zA-Z0-9-_]/', '', $sanitized_name); // Remove caracteres especiais
-			$sanitized_name = substr($sanitized_name, 0, 30); // Limita o comprimento do nome, se necessário
+		// Verificar duplicados e sanitizar os campos
+		$sanitized_fields = [];
+		foreach ($fields as $field) {
+			$sanitized_label = sanitize_text_field($field['label']);
+			$sanitized_name = sanitize_text_field($field['name']);
+			$sanitized_name = strtolower($sanitized_name); // Minúsculas
+			$sanitized_name = str_replace(' ', '_', $sanitized_name); // Substituir espaços por underscores
+			$sanitized_name = preg_replace('/[^a-zA-Z0-9-_]/', '', $sanitized_name); // Remover caracteres especiais
+			$sanitized_name = substr($sanitized_name, 0, 30); // Limitar comprimento
 
 			$sanitized_field = [
 				'label' => $sanitized_label,
 				'name' => $sanitized_name,
-				'type' => isset($field['type']) ? sanitize_text_field($field['type']) : '',
+				'type' => sanitize_text_field($field['type']),
 			];
 
-			// Se o tipo exigir opções, sanitiza-as
+			// Sanitizar opções, se existirem
 			if (in_array($field['type'], ['select', 'checkbox', 'radio'])) {
-				if (isset($field['options']) && is_array($field['options'])) {
-					$sanitized_field['options'] = array_map('sanitize_text_field', $field['options']);
-				} else {
-					$sanitized_field['options'] = [];
-				}
+				$sanitized_field['options'] = isset($field['options']) && is_array($field['options'])
+					? array_map('sanitize_text_field', $field['options'])
+					: [];
 			}
 
-			return $sanitized_field;
-		}, $fields);
+			// Remover duplicados com base no 'name'
+			$sanitized_fields[$sanitized_name] = $sanitized_field;
+		}
 
-
-		update_option('custom_registration_fields', $fields);
+		update_option('custom_registration_fields', array_values($sanitized_fields)); // Reindexar o array
 		echo '<div class="updated"><p>Campos salvos com sucesso!</p></div>';
 	}
 
@@ -81,59 +75,52 @@ function custom_fields_page(): void {
         <form method="post" action="">
 			<?php wp_nonce_field('custom_fields_save', 'custom_fields_nonce'); ?>
             <table class="form-table">
-                <tr>
-                    <th>Rótulo do Campo</th>
-                    <th>Tipo de Campo</th>
-                    <th>Opções (para Select, Checkbox, Radio)</th>
-                    <th>Ações</th>
-                </tr>
-				<?php foreach ($custom_fields as $index => $field): ?>
+                <tbody id="sortable" id="custom-fields-table">
                     <tr>
-                        <td>
-                            <label class="label"> Texto a apresentar </label>
-                            <br>
-                            <input type="text" name="custom_fields[<?php echo $index; ?>][label]" value="<?php echo esc_attr($field['label'] ?? ''); ?>" required />
-                            <br>
-                            <br>
-                            <label class="label"> Nome do campo na base de dados (max: 30 caracteres)</label>
-                            <br>
-                            <input type="text" name="custom_fields[<?php echo $index; ?>][name]" value="<?php echo esc_attr($field['name'] ?? ''); ?>" required />
-
-                        </td>
-                        <td>
-                            <select name="custom_fields[<?php echo $index; ?>][type]" class="field-type">
-                                <option value="text" <?php selected($field['type'], 'text'); ?>>Texto</option>
-                                <option value="email" <?php selected($field['type'], 'email'); ?>>Email</option>
-                                <option value="number" <?php selected($field['type'], 'number'); ?>>Número</option>
-                                <option value="date" <?php selected($field['type'], 'date'); ?>>Data</option>
-                                <option value="select" <?php selected($field['type'], 'select'); ?>>Seleção</option>
-                                <option value="checkbox" <?php selected($field['type'], 'checkbox'); ?>>Checkbox</option>
-                                <option value="radio" <?php selected($field['type'], 'radio'); ?>>Radio</option>
-                            </select>
-                        </td>
-                        <td>
-                            <!-- Campos para definir as opções -->
-                            <div class="options-container" <?php echo in_array($field['type'], ['select', 'checkbox', 'radio']) ? '' : 'style="display:none;"'; ?>>
-								<?php if (in_array($field['type'], ['select', 'checkbox', 'radio']) && !empty($field['options'])): ?>
-									<?php foreach ($field['options'] as $option): ?>
-                                        <div class="option-row">
-                                            <input type="text" name="custom_fields[<?php echo $index; ?>][options][]" value="<?php echo esc_attr($option); ?>" />
-                                            <button type="button" class="button remove-option">Remover</button>
-                                        </div>
-                                        <br>
-									<?php endforeach; ?>
-								<?php endif; ?>
-                                <br>
-                                <button type="button" class="button button-primary add-option">Adicionar Opção</button>
-                                <br>
-                                <br>
-                            </div>
-                        </td>
-                        <td>
-                            <button type="button" class="button remove-field">Remover</button>
-                        </td>
+                        <th>Rótulo do Campo</th>
+                        <th>Tipo de Campo</th>
+                        <th>Opções (para Select, Checkbox, Radio)</th>
+                        <th>Ações</th>
                     </tr>
-				<?php endforeach; ?>
+                    <?php foreach ($custom_fields as $index => $field): ?>
+                        <tr>
+                            <td>
+                                <label class="label">Texto a apresentar</label><br>
+                                <input type="text" name="custom_fields[<?php echo $index; ?>][label]" value="<?php echo esc_attr($field['label'] ?? ''); ?>" required />
+                                <br><br>
+                                <label class="label">Nome do campo na base de dados (max: 30 caracteres)</label><br>
+                                <input type="text" name="custom_fields[<?php echo $index; ?>][name]" value="<?php echo esc_attr($field['name'] ?? ''); ?>" required />
+                            </td>
+                            <td>
+                                <select name="custom_fields[<?php echo $index; ?>][type]" class="field-type">
+                                    <option value="text" <?php selected($field['type'], 'text'); ?>>Texto</option>
+                                    <option value="email" <?php selected($field['type'], 'email'); ?>>Email</option>
+                                    <option value="number" <?php selected($field['type'], 'number'); ?>>Número</option>
+                                    <option value="date" <?php selected($field['type'], 'date'); ?>>Data</option>
+                                    <option value="select" <?php selected($field['type'], 'select'); ?>>Seleção</option>
+                                    <option value="checkbox" <?php selected($field['type'], 'checkbox'); ?>>Checkbox</option>
+                                    <option value="radio" <?php selected($field['type'], 'radio'); ?>>Radio</option>
+                                </select>
+                            </td>
+                            <td>
+                                <div class="options-container" <?php echo in_array($field['type'], ['select', 'checkbox', 'radio']) ? '' : 'style="display:none;"'; ?>>
+                                    <?php if (in_array($field['type'], ['select', 'checkbox', 'radio']) && !empty($field['options'])): ?>
+                                        <?php foreach ($field['options'] as $option): ?>
+                                            <div class="option-row">
+                                                <input type="text" name="custom_fields[<?php echo $index; ?>][options][]" value="<?php echo esc_attr($option); ?>" />
+                                                <button type="button" class="button remove-option">Remover</button>
+                                            </div>
+                                        <?php endforeach; ?>
+                                    <?php endif; ?>
+                                    <button type="button" class="button button-primary add-option">Adicionar Opção</button>
+                                </div>
+                            </td>
+                            <td>
+                                <button type="button" class="button remove-field">Remover</button>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
             </table>
 
             <button type="button" class="button" id="add-field">Adicionar Campo</button>
@@ -144,28 +131,36 @@ function custom_fields_page(): void {
     <script>
         document.getElementById('add-field').addEventListener('click', function() {
             const table = document.querySelector('.form-table');
-            const rowCount = table.rows.length;
+            const rowCount = table.rows.length - 1;
             const row = document.createElement('tr');
             row.setAttribute('draggable', 'true');
             row.innerHTML = `
-                <td><input type="text" name="custom_fields[${rowCount}][name]" required /></td>
-                <td>
-                    <select name="custom_fields[${rowCount}][type]" class="field-type">
-                        <option value="text">Texto</option>
-                        <option value="email">Email</option>
-                        <option value="number">Número</option>
-                        <option value="date">Data</option>
-                        <option value="select">Seleção</option>
-                        <option value="checkbox">Checkbox</option>
-                        <option value="radio">Radio</option>
-                    </select>
-                </td>
-                <td>
-                    <div class="options-container" style="display:none;"></div>
-                    <button type="button" class="button add-option">Adicionar Opção</button>
-                </td>
-                <td><button type="button" class="button remove-field">Remover</button></td>
-            `;
+            <td>
+                <label class="label">Texto a apresentar</label>
+                <br>
+                <input type="text" name="custom_fields[${rowCount}][label]" required />
+                <br><br>
+                <label class="label">Nome do campo na base de dados (max: 30 caracteres)</label>
+                <br>
+                <input type="text" name="custom_fields[${rowCount}][name]" maxlength="30" required />
+            </td>
+            <td>
+                <select name="custom_fields[${rowCount}][type]" class="field-type">
+                    <option value="text">Texto</option>
+                    <option value="email">Email</option>
+                    <option value="number">Número</option>
+                    <option value="date">Data</option>
+                    <option value="select">Seleção</option>
+                    <option value="checkbox">Checkbox</option>
+                    <option value="radio">Radio</option>
+                </select>
+            </td>
+            <td>
+                <div class="options-container" style="display:none;"></div>
+                <button type="button" class="button add-option">Adicionar Opção</button>
+            </td>
+            <td><button type="button" class="button remove-field">Remover</button></td>
+        `;
             table.appendChild(row);
         });
 
@@ -182,9 +177,9 @@ function custom_fields_page(): void {
                 const div = document.createElement('div');
                 div.className = 'option-row';
                 div.innerHTML = `
-                    <input type="text" name="${e.target.closest('tr').querySelector('select').name.replace('[type]', '[options][]')}" />
-                    <button type="button" class="button remove-option">Remover</button>
-                `;
+                <input type="text" name="${e.target.closest('tr').querySelector('select').name.replace('[type]', '[options][]')}" />
+                <button type="button" class="button remove-option">Remover</button>
+            `;
                 container.appendChild(div);
                 container.style.display = 'block';
             }
@@ -205,6 +200,27 @@ function custom_fields_page(): void {
             }
         });
     </script>
+
+    <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
+    <script>
+        jQuery(document).ready(function($) {
+            $("#sortable").sortable();
+            $("#sortable").disableSelection();
+
+            document.addEventListener('change', function(e) {
+                if (e.target.classList.contains('field-type')) {
+                    const optionsContainer = e.target.closest('tr').querySelector('.options-container');
+                    if (['select', 'checkbox', 'radio'].includes(e.target.value)) {
+                        optionsContainer.style.display = 'block';
+                    } else {
+                        optionsContainer.style.display = 'none';
+                    }
+                }
+            });
+        });
+    </script>
+
 	<?php
 }
 

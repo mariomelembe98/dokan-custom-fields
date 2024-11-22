@@ -194,7 +194,7 @@ function save_dynamic_fields($customer_id): void {
 						break;
 				}
 
-				// Salva o valor sanitizado no meta do utilizador
+				// Salva o valor sanitizado no 'meta' do utilizador
 				update_user_meta($customer_id, $field_name, $sanitized_value);
 			} else {
 				// Se o campo não estiver presente no POST, remove o meta do utilizador
