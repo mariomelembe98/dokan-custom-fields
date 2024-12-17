@@ -10,15 +10,23 @@
  * License: GPL2
  */
 
-// TODO: don't call the file directly
+// don't call the file directly
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-// TODO: Define o diretório do plugin
+// Define o diretório do plugin
 if ( ! defined( 'MV_PLUGIN_DIR' ) ) {
 	define( 'MV_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 }
+
+// Verifique se o autoloader existe antes de carregar
+if (file_exists(__DIR__ . '/vendor/autoload.php')) {
+    require_once __DIR__ . '/vendor/autoload.php';
+} else {
+    error_log('Autoloader do PHPSpreadsheet não encontrado. Verifique a instalação.');
+}
+
 
 function enqueue_custom_admin_scripts($hook): void {
 	if ($hook !== 'toplevel_page_custom_fields') {

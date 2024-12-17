@@ -461,14 +461,192 @@ function save_custom_fields_after_migration( int $user_id): void {
 					$field_value = maybe_serialize($field_value);
 				}
 
-				// Salva o valor no meta do utilizador
+				// Salva o valor no 'meta' do utilizador
 				update_user_meta($user_id, $field_name, sanitize_text_field($field_value));
 			}
 		}
 	}
 }
-
 // Hook para salvar os campos personalizados após o utilizador se tornar vendedor
 add_action('dokan_customer_migration', 'save_custom_fields_after_migration');
+
+function import_all_vendors_from_excel($file_path): void {
+    require_once plugin_dir_path(__FILE__) . '../vendor/autoload.php';
+
+    // Carregar planilha
+    $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($file_path);
+    $sheet = $spreadsheet->getActiveSheet();
+    $data = $sheet->toArray();
+
+    // Verificar se há dados válidos
+    if (empty($data) || count($data) <= 1) {
+        echo '<div class="error"><p>Erro: O arquivo Excel está vazio ou sem dados válidos.</p></div>';
+        return;
+    }
+
+    $errors = [];
+    $success_count = 0;
+
+    // Adicionar barra de progresso
+    echo '<div id="progress-bar" style="width: 0%; background: green; height: 10px;"></div>';
+    echo '<script>
+    function updateProgress(percent) {
+        document.getElementById("progress-bar").style.width = percent + "%";
+    }
+    </script>';
+
+    $total_rows = count($data) - 1;
+
+    // Processar cada linha do Excel (ignorando cabeçalhos)
+    foreach ($data as $index => $row) {
+        if ($index === 0) continue; // Ignorar cabeçalhos
+
+        // Recuperar os dados da linha
+        $nr_lic = sanitize_text_field($row[0] ?? null);
+        $nr_proc = sanitize_text_field($row[1] ?? null);
+        $tipo_licenca = sanitize_text_field($row[2] ?? null);
+        $data_emissao = sanitize_text_field($row[3] ?? null);
+        $nr_trabalhadores = intval($row[4] ?? 0);
+        $investimento_inicial = floatval($row[5] ?? 0);
+        $full_name = sanitize_text_field($row[6] ?? null);
+        $tipo_doc = sanitize_text_field($row[7] ?? null);
+        $nr_doc = sanitize_text_field($row[8] ?? null);
+        $nacionalidade = sanitize_text_field($row[9] ?? 'MZ');
+        $nuit = sanitize_text_field($row[10] ?? null);
+        $denominacao_social = sanitize_text_field($row[11] ?? null);
+        $nuel = sanitize_text_field($row[12] ?? null);
+        $empresario = sanitize_text_field($row[13] ?? null);
+        $cae_principal = sanitize_text_field($row[14] ?? null);
+        $caes = sanitize_text_field($row[15] ?? null);
+        $address = sanitize_text_field($row[16] ?? null);
+        $nr_porta = sanitize_text_field($row[17] ?? null);
+        $andar = sanitize_text_field($row[18] ?? null);
+        $bairro = sanitize_text_field($row[19] ?? null);
+        $distrito = sanitize_text_field($row[20] ?? null);
+        $provincia = sanitize_text_field($row[21] ?? null);
+        $phone = sanitize_text_field($row[22] ?? null);
+        $store_url = sanitize_user(strtolower(str_replace(' ', '', $denominacao_social)));
+
+		// Extrair o primeiro nome
+		$name = explode(' ', trim($full_name))[0];
+
+        // Ajustar nacionalidade
+        if ($nacionalidade === "REPÚBLICA DE MOÇAMBIQUE") {
+            $nacionalidade = "MZ";
+        } elseif ($nacionalidade === "REPÚBLICA PORTUGUESA") {
+            $nacionalidade = "PT";
+        }
+
+        // Validar campos obrigatórios
+        if (empty($name) || empty($denominacao_social)) {
+            $errors[] = "Linha $index ignorada: Nome ou Denominação Social ausente.";
+            continue;
+        }
+
+        // Gerar username único
+        $username_base = sanitize_user(strtolower(str_replace(' ', '', $name)));
+        $username = $username_base;
+        $counter = 1;
+        while (username_exists($username)) {
+            $username = $username_base . $counter;
+            $counter++;
+        }
+
+        // Gerar endereço eletrónico único
+        $email = $username . '@tempo.co.mz';
+        if (email_exists($email)) {
+            $errors[] = "Linha $index ignorada: Email $email já cadastrado.";
+            continue;
+        }
+
+        // Criar utilizador no WordPress
+        $user_id = wp_insert_user([
+            'user_login' => $username,
+            'user_email' => $email,
+            'user_pass'  => wp_generate_password(),
+        ]);
+
+        if (is_wp_error($user_id)) {
+            $errors[] = "Erro ao criar usuário na linha $index: " . $user_id->get_error_message();
+            continue;
+        }
+
+        // Atribuir papel de vendedor
+        $user = new WP_User($user_id);
+        $user->set_role('seller');
+
+	    // Salvar metadados adicionais
+	    update_user_meta($user_id, 'first_name', $name);
+	    update_user_meta($user_id, 'last_name', '');
+	    update_user_meta($user_id, 'dokan_enable_selling', 'yes');
+	    update_user_meta($user_id, 'dokan_publishing', 'no');
+
+        // Configurar dokan_profile_settings diretamente como array
+	    $profile_settings = [
+		    'store_name' => $denominacao_social,
+		    'store_url'  => $store_url,
+		    'social' => [
+			    'fb' => '',
+			    'twitter' => '',
+			    'instagram' => '',
+		    ],
+		    'phone' => $phone,
+		    'address' => [
+			    'street_1' => $address,
+			    'street_2' => '',
+			    'city'     => $bairro,
+			    'state'    => $provincia,
+			    'zip'      => '',
+			    'country'  => $nacionalidade
+		    ],
+		    'banner' => 0,
+		    'icon'   => 0,
+		    'gravatar' => 0
+	    ];
+
+        // Salvar sem serialização
+	    update_user_meta($user_id, 'dokan_profile_settings', $profile_settings);
+
+        // Outros campos personalizados
+	    update_user_meta($user_id, 'investimento_inicial', $investimento_inicial);
+	    update_user_meta($user_id, 'tipo_doc', $tipo_doc);
+	    update_user_meta($user_id, 'nr_doc', $nr_doc);
+	    update_user_meta($user_id, 'country', $nacionalidade);
+	    update_user_meta($user_id, 'nuit', $nuit);
+	    update_user_meta($user_id, 'nuel', $nuel);
+	    update_user_meta($user_id, 'empresario', $empresario);
+	    update_user_meta($user_id, 'cae_principal', $cae_principal);
+	    update_user_meta($user_id, 'caes', $caes);
+	    update_user_meta($user_id, 'vendor_address', $address);
+	    update_user_meta($user_id, 'nr_lic', $nr_lic);
+	    update_user_meta($user_id, 'nr_proc', $nr_proc);
+	    update_user_meta($user_id, 'tipo_licenca', $tipo_licenca);
+	    update_user_meta($user_id, 'data_emissao', $data_emissao);
+	    update_user_meta($user_id, 'nr_trab', $nr_trabalhadores);
+	    update_user_meta($user_id, 'vendor_phone', $phone);
+	    update_user_meta($user_id, 'nr_porta', $nr_porta);
+	    update_user_meta($user_id, 'andar', $andar);
+	    update_user_meta($user_id, 'distrito', $distrito);
+	    update_user_meta($user_id, 'provincia', $provincia);
+
+	    $success_count++;
+
+        // Atualizar barra de progresso
+        $progress = round(($index / $total_rows) * 100);
+        echo '<script>updateProgress(' . $progress . ');</script>';
+        flush();
+    }
+
+    // Exibir resultado
+    echo '<div class="updated"><p>Importação concluída: ' . $success_count . ' utilizadores importados com sucesso.</p></div>';
+
+    if (!empty($errors)) {
+        echo '<div class="error"><p>Erros encontrados:</p><ul>';
+        foreach ($errors as $error) {
+            echo '<li>' . esc_html($error) . '</li>';
+        }
+        echo '</ul></div>';
+    }
+}
 
 

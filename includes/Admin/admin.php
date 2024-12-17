@@ -15,6 +15,14 @@ function custom_fields_menu(): void {
         'dashicons-list-view',  // Ícone do menu
         60                      // Posição no menu
     );
+	add_submenu_page(
+		'custom-fields',         // Slug do menu pai (alterar para o menu principal desejado)
+		'Importar Vendedores',   // Título da página
+		'Importar Vendedores',   // Título do submenu
+		'manage_options',        // Capacidade necessária
+		'import-vendors',        // Slug do submenu
+		'render_vendor_import_page' // Função que renderiza a página
+	);
 }
 
 // Página de gerenciamento de campos personalizados
@@ -222,5 +230,35 @@ function custom_fields_page(): void {
     </script>
 
 	<?php
+}
+
+
+// Renderizar página de upload
+function render_vendor_import_page(): void {
+	if (isset($_POST['upload_excel']) && !empty($_FILES['excel_file']['tmp_name'])) {
+		$uploaded_file = $_FILES['excel_file'];
+		$upload_dir = wp_upload_dir();
+		$upload_path = $upload_dir['basedir'] . '/' . $uploaded_file['name'];
+
+		// Mover o arquivo para a pasta de uploads
+		if (move_uploaded_file($uploaded_file['tmp_name'], $upload_path)) {
+			echo '<div class="updated"><p>Arquivo enviado com sucesso! Caminho: ' . $upload_path . '</p></div>';
+
+			// Aqui você pode processar o arquivo Excel
+			import_all_vendors_from_excel($upload_path);
+		} else {
+			echo '<div class="error"><p>Erro ao enviar o arquivo. Tente novamente.</p></div>';
+		}
+	}
+
+	// Renderizar o formulário de upload
+	echo '<div class="wrap">';
+	echo '<h1>Importar Vendedores</h1>';
+	echo '<p>Faça o ‘upload’ de um arquivo Excel para adicionar vendedores.</p>';
+	echo '<form method="POST" enctype="multipart/form-data">';
+	echo '<input type="file" name="excel_file" accept=".xlsx,.xls" required>';
+	echo '<button type="submit" name="upload_excel" class="button button-primary">Enviar Arquivo</button>';
+	echo '</form>';
+	echo '</div>';
 }
 
